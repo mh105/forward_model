@@ -1,0 +1,369 @@
+#!/bin/sh
+#
+#   This script greatly simplifies the source space creation...
+#
+#   Copyright 2006
+#
+#   Matti Hamalainen
+#   Athinoula A. Martinos Center for Biomedical Imaging
+#   Massachusetts General Hospital
+#   Charlestown, MA, USA
+#
+#   No part of this program may be photocopied, reproduced,
+#   or translated to another program language without the
+#   prior written consent of the author.
+#
+#   $Id: mne_setup_source_space 2970 2009-11-09 12:13:49Z msh $
+#
+#   Revision 1.18  2009/02/10 02:12:55  msh
+#   Accommodate the new options of mne_add_patch_info
+#
+#   Revision 1.17  2008/10/23 21:41:45  msh
+#   Check for FREESURFER_HOME when appropriate
+#   mne_setup_source_space does not need the freesurfer license any more
+#
+#   Revision 1.16  2008/06/14 14:48:25  msh
+#   Modifications for compatibility with mne_make_source_space 2.1
+#
+#   Revision 1.15  2007/04/25 11:31:13  msh
+#   Fixed an erroneous export command
+#
+#   Revision 1.14  2006/12/13 16:29:51  msh
+#   Fixed the naming of patch output w files
+#
+#   Revision 1.13  2006/09/25 16:04:01  msh
+#   One more typo fixed.
+#
+#   Revision 1.12  2006/09/25 15:37:02  msh
+#   Still a small error in the patch info file naming.
+#
+#   Revision 1.11  2006/09/25 15:31:40  msh
+#   Fixed the patch area file name for --ico option
+#
+#
+#
+#
+cleanup()
+{
+	rm -f $lh_dec
+	rm -f $rh_dec
+	echo "Temporary files removed."
+}
+usage()
+{
+	echo "usage: $0 [options]"
+	echo 
+	echo "     --overwrite             (to write over existing files)"
+	echo "     --subject subject       (defaults to SUBJECT environment variable)"
+	echo "     --morph subject         (morph the soure space to this subject)"
+	echo "     --spacing spacing [mm]  (defaults to 7 mm)"
+	echo "     --ico number            (use the recursively subdivided icosahedron or octahedron to create the source space)"
+	echo "     --all                   (include all vertices in the source space)"
+	echo "     --surface name          (defaults to white)"
+	echo "     --cps                   (create another source space file with patch information)"
+	echo
+	echo "Minimal invocation:"
+	echo
+	echo "$0                      (SUBJECT environment variable set)"
+	echo "$0 --subject subject    (define subject on the command line)"
+	echo 
+}
+#
+if [ ! "$SUBJECTS_DIR" ]
+then
+	echo "The environment variable SUBJECTS_DIR should be set"
+	exit 1
+fi
+if [ ! "$MNE_ROOT" ]
+then
+    echo "MNE_ROOT environment variable is not set"
+    exit 1
+fi
+#
+#
+#
+spacing=7
+surface=white
+force=false
+cps=false
+ico=
+morph=
+#
+#	Parse the options
+#
+while [ $# -gt 0 ]
+do
+	case "$1" in  
+	--subject) 
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--subject: argument required."
+			exit 1
+		else
+			export SUBJECT=$1
+		fi
+		;;
+	--morph) 
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--morph: argument required."
+			exit 1
+		else
+		        morph=$1
+		fi
+		;;
+	--spacing) 
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--spacing: argument required."
+			exit 1
+		else
+			spacing=$1
+		fi
+		;;
+	--surface) 
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--surface: argument required."
+			exit 1
+		else
+			surface=$1
+		fi
+		;; 
+	--ico) 
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--ico: argument required."
+			exit 1
+		else
+			ico=$1
+		fi
+		;; 
+	--all) 
+		ico=
+		spacing=
+		;; 
+	--overwrite)
+		force=true
+		;;
+	--cps)
+		cps=true
+		;;
+	--help)
+		usage
+		exit 1
+		;;
+	esac
+
+	shift
+done
+#
+#
+#	Check everything is alright
+#
+if [ ! "$SUBJECT" ]
+then
+	usage
+	exit 1
+fi
+#
+subject_dir=$SUBJECTS_DIR/$SUBJECT
+surf_dir=$subject_dir/surf
+if [ "$morph" ] ; then
+    bem_dir=$SUBJECTS_DIR/$morph/bem
+    dest_subject=$morph-$SUBJECT
+else
+    bem_dir=$subject_dir/bem
+    dest_subject=$SUBJECT
+fi
+export SUBJECT
+lh_surf=$surf_dir/lh.$surface
+rh_surf=$surf_dir/rh.$surface
+#
+if [ ! -d $subject_dir ]
+then 
+	echo "Could not find the MRI data directory $subject_dir"
+	exit 1
+fi
+if [ ! -d $surf_dir ]
+then 
+	echo "Could not find the surface reconstruction directory $surf_dir"
+	exit 1
+fi
+if [ ! -d $bem_dir ]
+then 
+    mkdir -p $bem_dir
+    if [ $? -ne 0 ]
+    then
+	echo "Could not create the model directory $bem_dir"
+	exit 1
+    fi
+fi
+if [ ! -r $lh_surf ]
+then
+	echo "Could not find the LH surface $lh_surf"
+	exit 1
+fi
+if [ ! -r $rh_surf ]
+then
+	echo "Could not find the RH surface $rh_surf"
+	exit 1
+fi
+#
+#	Report
+#
+echo 
+echo "Setting up the source space with the following parameters:"
+echo
+echo "SUBJECTS_DIR = $SUBJECTS_DIR"
+echo "Subject      = $SUBJECT"
+if [ "$morph" ] ; then
+echo "Morph        = $morph"
+fi
+echo "Surface      = $surface"
+if [ "$ico" ]
+then
+    if [ "$ico" -gt 0 ]
+    then
+	echo "Icosahedron subdivision grade $ico"
+    else
+	echo "Octahedron subdivision grade $((- $ico))"
+    fi	
+elif [ "$spacing" ] 
+then
+    echo "Grid spacing = $spacing mm"
+else
+    echo "Include all vertices"
+fi
+if [ "$cps" = "true" ]
+then
+echo "Create a source space with patch information"
+fi
+#
+#	Set up the file names
+#
+patch_suffix=p
+if [ "$ico" ]
+then
+    if  [ "$ico" -gt 0 ]
+    then 
+	src_space=$bem_dir/$dest_subject-ico-$ico-src.fif
+	src_spacep=$bem_dir/$dest_subject-ico-$ico$patch_suffix-src.fif
+	pinfo=$bem_dir/$dest_subject-ico-$ico$patch_suffix
+    else
+	src_space=$bem_dir/$dest_subject-oct-$((- $ico))-src.fif
+	src_spacep=$bem_dir/$dest_subject-oct-$((- $ico))$patch_suffix-src.fif
+	pinfo=$bem_dir/$dest_subject-oct-$((- $ico))$patch_suffix
+    fi
+elif [ "$spacing" ] 
+then
+    src_space=$bem_dir/$dest_subject-$spacing-src.fif
+    src_spacep=$bem_dir/$dest_subject-$spacing$patch_suffix-src.fif
+    pinfo=$bem_dir/$dest_subject-$spacing$patch_suffix
+else
+    src_space=$bem_dir/$dest_subject-all-src.fif
+    src_spacep=$bem_dir/$dest_subject-all$patch_suffix-src.fif
+    pinfo=$bem_dir/$dest_subject-all$patch_suffix
+fi
+if [ -f $src_space ]
+then
+	if [ $force = "false" ]
+	then
+		echo "$src_space already exists. Use the --overwrite option to recreate it"
+		exit 1
+	else
+		rm -f $src_space
+		if [ $? -ne 0 ]
+		then 
+			echo "Could not remove $src_space"
+			exit 1
+		fi
+	fi
+fi
+#
+#	Create the fif file
+#
+if [ "$morph" ] ; then
+    morph="--morph $morph"
+fi
+echo
+echo ">>> 1. Creating the source space file $src_space..."
+lh_surf=lh.$surface
+rh_surf=rh.$surface
+if [ "$ico" ]
+then 
+    mne_make_source_space --surf $lh_surf:$rh_surf \
+	--ico $ico --src $src_space $morph
+    if [ $? -ne 0 ]
+    then
+	echo "Source space creation failed"
+	rm -f $src_space
+	cleanup
+	exit 1
+    fi
+elif [ "$spacing" ] 
+then
+    mne_make_source_space --surf $lh_surf:$rh_surf \
+	--spacing $spacing --src $src_space $morph
+    if [ $? -ne 0 ]
+    then
+	echo "Source space creation failed"
+	rm -f $src_space
+	cleanup
+	exit 1
+    fi
+else
+    mne_make_source_space --surf $lh_surf:$rh_surf --src $src_space $morph
+    if [ $? -ne 0 ]
+    then
+	echo "Source space creation failed"
+	rm -f $src_space
+	cleanup
+	exit 1
+    fi
+fi
+echo ">>> 2. Creating ASCII versions for checking with MRI lab..."
+echo 
+if [ "$ico" ]
+then
+    if [ "$ico" -gt 0 ]
+    then
+	ascout=$bem_dir/$dest_subject-ico-$ico
+    else
+	ascout=$bem_dir/$dest_subject-oct-$((- $ico))
+    fi
+elif [ "$spacing" ]
+then
+    ascout=$bem_dir/$dest_subject-$spacing
+else
+    ascout=$bem_dir/$dest_subject-all
+fi
+mne_list_source_space --src $src_space \
+    --dip $ascout \
+    --pnt $ascout \
+    --w $ascout
+if [ $? -ne 0 ]
+then
+    echo "Failed to create the ASCII files"
+    echo "Source space $src_space is still available"
+    cleanup
+    exit 1
+fi
+cleanup
+if [ "$cps" = "true" ]
+then
+echo
+echo ">>> 3. Creating a source space with patch information"
+echo "       This will take quite a while..."
+mne_add_patch_info --src $src_space --srcp $src_spacep --w $pinfo
+fi
+echo
+echo "Finished."
+echo
+exit 0
+

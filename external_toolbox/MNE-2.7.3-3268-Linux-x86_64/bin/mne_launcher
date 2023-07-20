@@ -1,0 +1,255 @@
+#!/bin/sh
+#
+#	This script is sourced by other wrapper scripts to start one of the MNE tools
+#
+#       Copyright 2006
+#
+#       Matti Hamalainen
+#       Athinoula A. Martinos Center for Biomedical Imaging
+#       Massachusetts General Hospital
+#       Charlestown, MA, USA
+#
+#
+#	$Id: mne_launcher 2902 2009-10-31 23:00:23Z nicks $
+#
+#	Revision 1.15  2009/02/25 19:00:41  msh
+#	Provide a reasonable architecture alias for HP-UX
+#
+#	Revision 1.14  2009/02/25 14:02:11  msh
+#	Set SHLIB_PATH on HP-UX
+#	This allows mne_dacq_annotator to be run without a problem
+#	
+#	Revision 1.13  2008/09/30 19:02:53  msh
+#	Removed HP-UX preferences, prefer newer Darwin versions to the older ones
+#	
+#	Revision 1.12  2008/08/06 14:34:22  msh
+#	Fixed setting of LQT_PLUGIN_DIR
+#	
+#	Revision 1.11  2007/11/06 20:21:16  msh
+#	Use XUSERFILESEARCHPATH instead of XAPPLRESDIR
+#	
+#	Revision 1.10  2007/09/28 18:49:18  msh
+#	Added the possibility for LAPACK and BLAS libraries in $MNE_ROOT/libs/lapack-blas directory
+#	
+#	Revision 1.9  2007/03/17 10:37:10  msh
+#	Added maci Matlab binary directory for Intel Macs
+#	
+#	Revision 1.8  2006/11/29 14:26:05  msh
+#	Added generic i686 LINUX GNU alternative
+#	
+#	Revision 1.7  2006/11/05 14:13:44  msh
+#	The Intel Mac OSX fallback was incorrect
+#	
+#	Revision 1.6  2006/11/03 21:18:46  msh
+#	Added more compatibility links for Mac OSX / i686
+#	
+#	Revision 1.5  2006/10/24 12:30:34  msh
+#	Try the PowerPC binary in i686 Macs
+#	
+#	Revision 1.4  2006/10/21 02:05:28  msh
+#	Look for libraries in $MNE_ROOT/libs/<lib>
+#	
+#	Revision 1.3  2006/10/06 15:06:32  msh
+#	Convert ostype to lower case and remove dashes.
+#	Possibility for a system-specific Matlab directory added.
+#	
+#	Revision 1.2  2006/10/04 14:02:25  msh
+#	Fixed typo in mne_launcher
+#	
+#	Revision 1.1  2006/10/04 12:56:28  msh
+#	Added the new launcer script
+#	
+#
+
+find_archs()
+{
+   config_guess=$MNE_ROOT/bin/admin/config.guess
+   if [ ! -x $config_guess ]
+   then
+      echo "Executable $config_guess not found."
+      echo "Cannot determine the machine architecture"
+      exit 1
+   fi
+   system=`$config_guess`
+   if [ ! "$system" ]
+   then
+       echo "Could not determine the machine architecture"
+       exit 1
+   fi
+#
+#  Add some generic alternatives
+#
+   case "$system" in
+       x86_64-unknown-linux-gnu)
+	   archs="$system x86_64-pc-linux-gnu" ;;
+       i686-pc-linux-gnu*)
+	   archs="$system i686-pc-linux-gnu" ;;
+       powerpc-apple-darwin*)
+	   archs="$system powerpc-apple-darwin" ;;
+       i686-apple-darwin*)
+#
+#          This is the generic one without the version number
+#          and the powerpc version as the final fallback
+#
+	   archs="$system i686-apple-darwin powerpc-apple-darwin" ;;
+       hppa2.0*)
+           archs="$system hppa2.0-hp-hpux11.11" ;;
+       *)
+           archs="$system"	;;
+   esac    
+}
+
+setup_libs()
+#
+#   Set up the shared libraries to be used
+#
+{
+    uselibs="extra-libs $uselibs"
+    
+    if [ ! "$uselibs" ] ; then
+	return
+    fi
+	
+    ostype=`uname -s | tr '[A-Z]' '[a-z]' | tr -d '-'`
+    if [ ! "$ostype" ] ; then
+	echo "Could not determine the operating system type"
+	exit 1
+    fi
+#
+#   Set up the relevant environment variables
+#
+    for thislib in $uselibs
+      do
+      if [ "$ostype" = "linux" ] ; then
+	  export LD_LIBRARY_PATH=$MNE_ROOT/libs/$thislib/lib/$arch:$LD_LIBRARY_PATH
+      elif [ "$ostype" = "darwin" ] ; then
+	  export DYLD_LIBRARY_PATH=$MNE_ROOT/libs/$thislib/lib/$arch:$DYLD_LIBRARY_PATH
+      elif [ "$ostype" = "hpux" ] ; then
+	  export SHLIB_PATH=$MNE_ROOT/libs/$thislib/lib/$arch:$SHLIB_PATH
+      else
+	  echo "I do not know how shared libraries are handled in $ostype"
+	  exit 1
+      fi
+      echo $thislib | grep quicktime >/dev/null
+      if [ $? -eq 0 ] ; then
+	  export LQT_PLUGIN_DIR=$MNE_ROOT/libs/$thislib/lib/$arch/libquicktime
+      fi
+    done
+}
+
+setup_matlab()
+#
+#   Add the correct version of matlab if necessary
+#
+{
+    if [ "$need_matlab" != true ] ; then
+	return;
+    fi
+    
+    if [ ! "$MATLAB_ROOT" ] ; then
+	echo "MATLAB_ROOT environment variable is not set"
+	exit 1
+    fi
+    ostype=`uname -s | tr '[A-Z]' '[a-z]' | tr -d '-'`
+    if [ ! "$ostype" ] ; then
+	echo "Could not determine the operating system type"
+	exit 1
+    fi
+    if [ ! -d "$MATLAB_ROOT" ] ; then
+	echo "Matlab not available at $MATLAB_ROOT"
+    fi
+#
+#   Is there a system-specific Matlab directory available?
+#
+    
+    if [ -d "${MATLAB_ROOT}-${arch}" ] ; then
+	export MATLAB_ROOT=${MATLAB_ROOT}-${arch}
+    elif [ -d "${MATLAB_ROOT}-${ostype}" ] ; then
+	export MATLAB_ROOT=${MATLAB_ROOT}-${ostype}
+    fi
+#
+#   Pick the right one
+#
+    if [ "$ostype" = "linux" ] ; then 
+	case "$arch" in
+	    x86_64*)
+                export LD_LIBRARY_PATH=$MATLAB_ROOT/bin/glnxa64:$LD_LIBRARY_PATH ;;
+	    i686*)   
+  	        export LD_LIBRARY_PATH=$MATLAB_ROOT/bin/glnx86:$LD_LIBRARY_PATH ;;
+	esac
+    elif [ "$ostype" = "darwin" ] ; then 
+        case "$arch" in
+	    i686*)
+	    export DYLD_LIBRARY_PATH=$MATLAB_ROOT/bin/maci:$DYLD_LIBRARY_PATH ;;
+	    powerpc*)
+	    export DYLD_LIBRARY_PATH=$MATLAB_ROOT/bin/mac:$DYLD_LIBRARY_PATH ;;
+	esac
+    fi
+}
+#
+
+setup_x11()
+
+{
+    if [ "$is_x11_prog" = true ] ; then
+#
+#	This is where the app-defaults live
+#
+	export XUSERFILESEARCHPATH=${XUSERFILESEARCHPATH}:${MNE_ROOT}/app-defaults/%N
+#
+#       HP-UX file selection boxes do no honor the working directory change
+#       unless this is done 
+#
+	unset PWD
+    fi
+}
+if [ ! "$MNE_ROOT" ]
+then
+    echo "MNE_ROOT environment variable is not set"
+    exit 1
+fi
+#
+# Find the candidate architectures
+#
+find_archs
+#
+# Extract arguments and form a quoted list so that quoted args
+# will be handled correctly
+#
+while [ $# -gt 0 ] 
+do 
+	args="$args '$1'"
+	shift 1
+done
+#
+# Try all possible candidates
+#
+for arch in $archs
+do
+	prog=`dirname $0`/$arch/`basename $0`
+	if [ -x $prog ]
+	then
+	    setup_libs
+	    setup_matlab
+	    setup_x11
+	    eval exec $prog $args
+	    exit $?
+	fi
+done
+#
+# None of them found
+# See what all we tried
+#
+echo "`basename $0` not supported on this platform ($system)"
+for arch in $archs
+do
+	prog=`dirname $0`/$arch/`basename $0`
+	echo "    Could not find $prog"
+done
+echo "Sorry."
+exit 1
+
+
+
+
+

@@ -1,0 +1,167 @@
+#!/bin/bash
+
+set -e 
+
+# This is an automated pipeline to build 4-shell forward models in the Purdonlab.
+# Reference:
+# He, M., Liu, F., Nummenmaa, A., Hämäläinen, M., Dickerson, B. C., & Purdon, P. L. (2021). Age-Related EEG Power Reductions Cannot Be Explained by Changes of the Conductivity Distribution in the Head Due to Brain Atrophy. Frontiers in aging neuroscience, 26.
+
+# Last edit: Alex He 10/06/2022
+
+
+
+# Note the start time
+start=$(date +%s)
+
+# Store the current directory to get back after the pipeline 
+CURRDIR=$PWD
+
+
+
+##################################
+# STEP 2: Check SimNIBS Pipeline Results
+##################################
+
+# Get user input of subject directory as a full path
+if [ -z "$SUBDIR" ]
+then
+    echo ""
+    ls /autofs/cifs/adsleepeeg/archive/subject_data
+    echo ""
+    read -p "SUBDIR=" SUBDIR
+fi
+
+if [[ ! "$SUBDIR" == *"/"* ]]
+then
+    echo "Shorthand SUBDIR detected. Automatically appending /autofs/cifs/adsleepeeg/archive/subject_data/*/mri."
+    SUBDIR=/autofs/cifs/adsleepeeg/archive/subject_data/$SUBDIR/mri
+fi
+
+# Using space-holder subject ID for SimNIBS pipelines
+SUBID=FS6
+
+MAINDIR=$SUBDIR/simnibs_pipe
+
+
+
+# Prompt user to inspect headreco_log.html
+read -p "Any errors in $MAINDIR/headreco/m2m_$SUBID/headreco_log.html? (y/n):" EXIT_FLAG
+if [ "y" == "$EXIT_FLAG" ]
+then
+    echo "Errors reported in headreco_log.html. Please debug."
+    CURRDIR=$PWD
+    return 0001 # die with error code 0001
+fi
+
+# Prompt user to inspect mri2mesh_log.html
+read -p "Any errors in $MAINDIR/mri2mesh/m2m_$SUBID/mri2mesh_log.html? (y/n):" EXIT_FLAG
+if [ "y" == "$EXIT_FLAG" ]
+then
+    echo "Errors reported in mri2mesh_log.html. Please debug."
+    CURRDIR=$PWD
+    return 0001 # die with error code 0001
+fi
+
+
+
+# Create the BEM meshes using SimNIBS check commands 
+cd $MAINDIR/headreco
+headreco check $SUBID
+
+read -p "Any issues with the headreco pipeline checks? (y/n):" EXIT_FLAG
+if [ "y" == "$EXIT_FLAG" ]
+then
+    echo "Errors reported in running SimNIBS headreco checks. Please debug."
+    CURRDIR=$PWD
+    return 0001 # die with error code 0001
+fi
+
+cd $MAINDIR/mri2mesh
+mri2mesh -c $SUBID
+
+read -p "Any issues with the mri2mesh pipeline checks? (y/n):" EXIT_FLAG
+if [ "y" == "$EXIT_FLAG" ]
+then
+    echo "Errors reported in running SimNIBS mri2mesh checks. Please debug."
+    CURRDIR=$PWD
+    return 0001 # die with error code 0001
+fi
+
+
+
+# Check regular Freesurfer recon, this should already be recon-edited prior to start of this pipeline
+cd $SUBDIR/recons
+export SUBJECTS_DIR=$PWD
+fvb FS6
+read -p "Any issues with the Freesurfer recon-all? (y/n):" EXIT_FLAG
+if [ "y" == "$EXIT_FLAG" ]
+then
+    echo "Errors reported in checking Freesurfer recon-all. Please debug."
+    CURRDIR=$PWD
+    return 0001 # die with error code 0001
+fi
+
+# Check mri2mesh Freesurfer recon
+cd $MAINDIR/mri2mesh
+export SUBJECTS_DIR=$PWD
+fvb "fs_$SUBID"
+read -p "Any issues with the mri2mesh recon-all? (y/n):" EXIT_FLAG
+if [ "y" == "$EXIT_FLAG" ]
+then
+    echo "Errors reported in checking mri2mesh recon-all. Please debug."
+    CURRDIR=$PWD
+    return 0001 # die with error code 0001
+fi
+
+
+
+# Check headreco BEM surfaces
+cd $MAINDIR/headreco/m2m_$SUBID
+freeview -v T1fs_nu_conform.nii.gz -f head_contr.fsmesh
+read -p "Any issues with the headreco BEM surfaces? (y/n):" EXIT_FLAG
+if [ "y" == "$EXIT_FLAG" ]
+then
+    echo "Errors reported in checking headreco BEM. Please debug."
+    CURRDIR=$PWD
+    return 0001 # die with error code 0001
+fi
+
+# Check mri2mesh BEM surfaces
+cd $MAINDIR/mri2mesh/m2m_$SUBID
+freeview -v T1fs_nu_conform.nii.gz -f tmp/check_tmp1.fsmesh
+read -p "Any issues with the mri2mesh BEM surfaces? (y/n):" EXIT_FLAG
+if [ "y" == "$EXIT_FLAG" ]
+then
+    echo "Errors reported in checking mri2mesh BEM. Please debug."
+    CURRDIR=$PWD
+    return 0001 # die with error code 0001
+fi
+
+##################################
+# End of STEP 2
+##################################
+unset SUBDIR
+echo ""
+echo "frontiers_4shell_pipeline_step2.txt completed without error."
+echo ""
+
+
+
+# Go back to the original directory
+cd $CURRDIR 
+
+# Report time taken to run this script 
+
+secs_to_human() {
+    if [[ -z ${1} || ${1} -lt 60 ]] ;then
+        min=0 ; secs="${1}"
+    else
+        time_mins=$(echo "scale=2; ${1}/60" | bc)
+        min=$(echo ${time_mins} | cut -d'.' -f1)
+        secs="0.$(echo ${time_mins} | cut -d'.' -f2)"
+        secs=$(echo ${secs}*60|bc|awk '{print int($1+0.5)}')
+    fi
+    echo "Time taken for STEP 2 : ${min} minutes and ${secs} seconds."
+}
+
+secs_to_human "$(($(date +%s) - ${start}))"

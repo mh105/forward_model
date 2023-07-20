@@ -1,0 +1,61 @@
+#!/bin/sh
+#
+#       Show the environment information from a file
+#
+#       Copyright 2006
+#
+#       Matti Hamalainen
+#       Athinoula A. Martinos Center for Biomedical Imaging
+#       Massachusetts General Hospital
+#       Charlestown, MA, USA
+#
+#       $Id: mne_show_environment 2970 2009-11-09 12:13:49Z msh $
+#
+#
+if [ ! "$MNE_ROOT" ]
+then
+    echo "MNE_ROOT environment variable is not set"
+    exit 1
+fi
+if [ $# -eq 0 ]
+then
+	echo "usage: $0 files"
+	exit 1
+fi
+for file in $*
+do
+    if [ ! -f $file ]
+    then
+	echo "$1 not found"
+	continue
+    fi
+    if [ ! -r $file ]
+    then
+	echo "$1 not readable"
+	continue
+    fi
+    cwd=$(mne_show_fiff --verbose --tag  3550 --in $file --long | cut -c 27-)
+    command=$(mne_show_fiff --verbose --tag  3551 --in $file --long | cut -c 27-)
+    if [ ! "$cwd" ]
+    then
+	continue
+    fi
+    if [ ! "$command" ]
+    then
+	continue
+    fi
+    shift
+    echo "------------------------------------------------------------------------------"
+    echo "file    = $file"
+    echo "cwd     = $cwd"
+    echo "command = $(echo $command | sed 's/--/\\\
+	--/g')"
+done
+echo "------------------------------------------------------------------------------"
+exit 0
+
+
+
+
+
+

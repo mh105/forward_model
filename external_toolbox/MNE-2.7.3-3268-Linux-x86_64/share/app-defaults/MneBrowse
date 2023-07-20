@@ -1,0 +1,726 @@
+!
+!	This is the X resource file for mne_browse_raw (class MneBrowse)
+!
+!	$Header$
+!	$Log$
+!	Revision 1.57  2009/04/04 17:33:25  msh
+!	Added flatness detection variables.
+!	Version number incremented to 2.21
+!
+!	Revision 1.56  2009/03/27 01:16:32  msh
+!	Added the predefined colors to color editor
+!	Version number is now 2.20
+!	
+!	Revision 1.55  2009/02/21 16:31:40  msh
+!	Changed some labels in the event list
+!	
+!	Revision 1.54  2009/02/21 15:32:40  msh
+!	Added the header and log to the initial comments
+!	
+!
+!
+MneBrowse.title:			Browse and process...
+*enableToggleVisual:			True
+!*enableToggleColor:			True
+*fontList:             			-adobe-helvetica-medium-r-normal--14-*-iso8859-1
+!*highlightColor:			yellow
+!*highlightOnEnter:			true
+!*keyboardFocusPolicy:			pointer
+
+*Xmsh_error*dialogTitle:		There is a problem
+*Xmsh_message*dialogTitle:		Good for you to know...
+*Xmsh_warning*dialogTitle:		Warning
+*Xmsh_working*dialogTitle:		This will take a few...
+*Xmsh_working*okLabelString:		Stop
+*XmList.background:			#eaeaea
+*XmTextField.background:		#eaeaea
+*XmPushButtonGadget.shadowThickness:	1
+!
+! Menus
+!
+*fileMenu.fontList:		        -adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*fileMenu.labelString:			File
+*fileMenu.mnemonic:			F
+*fileMenu.tearOffModel:			tear_off_enabled
+*fileMenu.tearOffTitle:			File
+
+*fileMenu*open.labelString:		Open...
+*fileMenu*open.mnemonic:		O
+*fileMenu*open.accelerator:		Meta<Key>O
+*fileMenu*open.acceleratorText:		Alt-O
+
+*fileMenu*openEvoked.labelString:	Open evoked...
+*fileMenu*openEvoked.mnemonic:		v
+
+*fileMenu*save.labelString:		Save...
+*fileMenu*save.mnemonic:		S
+*fileMenu*save.accelerator:		Meta<Key>S
+*fileMenu*save.acceleratorText:		Alt-S
+
+*fileMenu*chdir.labelString:	        Change working directory...
+*fileMenu*chdir.mnemonic:		C
+
+*fileMenu*readProj.labelString:		Read projection...
+*fileMenu*readProj.mnemonic:		p
+
+*fileMenu*saveProj.labelString:		Save projection...
+*fileMenu*saveProj.mnemonic:		v
+
+*fileMenu*markBad.labelString:		Apply bad channels
+*fileMenu*markBad.mnemonic:		b
+
+*fileMenu*loadEvents.labelString:	Load events (text)...
+*fileMenu*loadEvents.mnemonic:		d
+
+*fileMenu*loadEventsFiff.labelString:	Load events (fif)...
+*fileMenu*loadEventsFiff.mnemonic:	i
+
+*fileMenu*saveEvents.labelString:	Save events (text)...
+*fileMenu*saveEvents.mnemonic:		e
+
+*fileMenu*saveEventsFiff.labelString:	Save events (fif)...
+*fileMenu*saveEventsFiff.mnemonic:	f
+
+*fileMenu*saveSelections.labelString:	Save channel selections...
+*fileMenu*saveSelections.mnemonic:	l
+
+*fileMenu*loadSelections.labelString:	Load channel selections...
+
+*fileMenu*saveDeriv.labelString:        Save derivations...
+
+*fileMenu*loadDeriv.labelString:        Load derivations...
+*fileMenu*loadDeriv.mnemonic:           r
+
+
+
+*fileMenu*quit.labelString:		Quit
+*fileMenu*quit.mnemonic:		Q
+*fileMenu*quit.accelerator:		Meta<Key>Q
+*fileMenu*quit.acceleratorText:		Alt-Q
+
+*adjustMenu.fontList:		        	-adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*adjustMenu.labelString:      			Adjust
+*adjustMenu.tearOffModel:			tear_off_enabled
+*adjustMenu.tearOffTitle:			Adjust
+*adjustMenu.mnemonic:				A
+
+*adjustMenu*filterPref.labelString:    		Filter...
+*adjustMenu*filterPref.mnemonic:		F
+
+*adjustMenu*scalesPref.labelString:    		Scales...
+*adjustMenu*scalesPref.mnemonic:		S
+
+*adjustMenu*derivPref.labelString:    		Derivations...
+*adjustMenu*derivPref.mnemonic:			D
+
+*adjustMenu*selectionPref.labelString:    	Selection...
+*adjustMenu*selectionPref.mnemonic:		l
+
+*adjustMenu*projectionPref.labelString:    	Projection...
+*adjustMenu*projectionPref.mnemonic:		P
+
+*adjustMenu*compensationPref.labelString:    	Compensation...
+*adjustMenu*compensationPref.mnemonic:		m
+
+*adjustMenu*colorPref.labelString:    		Colors...
+*adjustMenu*colorPref.mnemonic:			C
+
+*adjustMenu*loutPref.labelString:    		Full view layout...
+*adjustMenu*loutPref.mnemonic:			F
+
+*adjustMenu*avePref.labelString:    		Averaging preferences...
+*adjustMenu*avePref.mnemonic:			v
+
+*processMenu.fontList:		        	-adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*processMenu.labelString:			Process
+*processMenu.mnemonic:				P
+*processMenu.tearOffModel:			tear_off_enabled
+*processMenu.tearOffTitle:			Process
+
+*processMenu*average.labelString:		Average...
+*processMenu*average.mnemonic:			A
+
+*processMenu*cov.labelString:		        Compute covariance...
+*processMenu*cov.mnemonic:			C
+
+*processMenu*rawCov.labelString:		Compute raw data covariance...
+*processMenu*rawCov.mnemonic:			R
+
+*processMenu*SSP.labelString:			Create a new SSP operator...
+*processMenu*SSP.mnemonic:			S
+
+*windowsMenu.fontList:		        	-adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*windowsMenu.labelString:      			Windows
+*windowsMenu.mnemonic:				W
+*windowsMenu.tearOffModel:			tear_off_enabled
+*windowsMenu.tearOffTitle:			Windows
+
+*windowsMenu*showFullView.labelString:    	Show full view...
+*windowsMenu*showFullView.mnemonic:		f
+
+*windowsMenu*showAveView.labelString:    	Show averages...
+*windowsMenu*showAveView.mnemonic:		a
+
+*windowsMenu*startMneAnalyze.labelString:    	Start mne_analyze
+*windowsMenu*startMneAnalyze.mnemonic:		m
+
+*windowsMenu*showHeadPosition.labelString:    	Show head position
+*windowsMenu*showHeadPosition.mnemonic:		h
+
+*windowsMenu*quitMneAnalyze.labelString:    	Quit mne_analyze
+*windowsMenu*quitMneAnalyze.mnemonic:		Q
+
+*windowsMenu*aveDisp.labelString:    		Manage averages...
+*windowsMenu*aveDisp.mnemonic:			g
+
+*windowsMenu*showEventList.labelString:    	Show event list...
+*windowsMenu*showEventList.mnemonic:		e
+
+*windowsMenu*showAnnotator.labelString:    	Show annotator...
+*windowsMenu*showAnnotator.mnemonic:		n
+
+*helpMenu.fontList:				-adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*helpMenu.labelString:				Help
+*helpMenu.mnemonic:				H
+
+*helpMenu*onVersion.labelString:		On version...
+*helpMenu*onLicense.labelString:		On license...
+*helpMenu*onFile.labelString:		        About current data...
+*helpMenu*whyBeep.labelString:			Why the beep?
+
+*openFile*dialogTitle:				    	Open a raw data file
+*openFile*keepSkip*alignment:			        alignment_beginning
+*openFile*keepSkip*labelString:				Keep the initial skip
+*openFile*gradsTitle*labelString:		     	Software gradient compensation
+*openFile*grads*none.selectColor: 		  	green
+*openFile*grads*XmToggleButtonGadget.selectColor:	red
+*openFile*filterRow.orientation:			horizontal
+*openFile*filterRow.adjustLast:				false
+*openFile*filterRow*XmPushButtonGadget.marginWidth:	5
+*openFile*filterRow*XmPushButtonGadget.marginHeight:	3
+*openFile*filter*labelString:				List :\ 
+*openFile*rawFilter*labelString:			Raw files
+*openFile*sssFilter*labelString:			Maxfilter output files
+*openFile*none*labelString:				No compensation
+*openFile*grad1*labelString:				First-order gradient
+*openFile*grad2*labelString:				Second-order gradient
+*openFile*grad3*labelString:				Third-order gradient
+*openFile*grad4*labelString:				4D compensation # 1
+*openEvoked*dialogTitle:				Open an evoked data file
+!
+*saveFile*dialogTitle:				Save processed data
+*saveFile*adjustLast:				False
+*saveFile*decim*columns:			12
+*saveFile*decim*value:				1
+*saveFile*decim*labelString:			Decimation factor :\ 
+!
+!       Change directory dialog
+!
+*changeDir*dialogTitle:			Change working directory
+!
+!	Main window
+!
+*mainWindow.width:				1550
+*mainWindow.height:				700
+*mainWindow*scroll.orientation:			horizontal
+*mainWindow*scrolls.orientation:		horizontal
+*mainWindow*scrolls.sensitive:			False
+*mainWindow*disp.paneMaximum:			2000
+*mainWindow*disp.paneMinimum:			100
+*mainWindow*disps.paneMaximum:			2000
+*mainWindow*disps.paneMinimum:			200
+*mainWindow*disps.width:			200
+*mainWindow*disp.width:				1000
+
+*mainWindow*paned.orientation:			horizontal
+
+*mainWindow*browseMessageRow*orientation: 	Horizontal
+*mainWindow*browseMessage*labelString: 		Ready to go...
+*mainWindow*browseMessage*alignment:   	      	alignment_beginning
+*mainWindow*browseMessage.marginWidth:  	5
+*mainWindow*browseMessage.marginHeight: 	2
+*mainWindow*browseMessageSegment*labelString: 	Nothing yet...
+*mainWindow*browseMessageSegment*alignment: 	alignment_beginning
+*mainWindow*browseMessageSegment.marginWidth:  	5
+*mainWindow*browseMessageSegment.marginHeight: 	2
+*mainWindow*browseTime*columns: 		10
+*mainWindow*browseTime*labelString: 	        start/s :\ 
+!
+!	The parameter to adjust_time_value indicates percentage of
+!	the current time span of the display
+!
+*mainWindow*browseTime*XmTextField.translations: \
+#override  \n\
+None<Key>osfUp:		adjust_time_value(-10)\n\
+None<Key>osfDown:	adjust_time_value(10)\n\
+Ctrl<Key>osfUp:		adjust_time_value(-100)\n\
+Ctrl<Key>osfDown:	adjust_time_value(100)\n\
+None<Key>osfPageDown:	adjust_time_value(100)\n\
+None<Key>osfPageUp:	adjust_time_value(-100)
+
+*mainWindow*buttons.orientation:		horizontal
+*mainWindow*buttons.adjustLast:			False
+*mainWindow*offset.labelString:			Remove dc
+*mainWindow*dc.labelString:			Keep dc
+*mainWindow*stim*columns:			5
+*mainWindow*stim*value:				1
+*mainWindow*stim*labelString:			Jump to :\ 
+*mainWindow*backward*arrowDirection:		arrow_left
+*mainWindow*forward*arrowDirection:		arrow_right
+*mainWindow*forget*labelString:			Unmark
+*mainWindow*user.borderWidth:			1
+*mainWindow*user.marginHeight:			1
+*mainWindow*user.orientation:			horizontal
+*mainWindow*user*labelString:			Picked to : \ 
+*mainWindow*user*value:				1000
+*mainWindow*user*columns:			5
+*mainWindow*forgetUser.borderWidth:		1
+*mainWindow*forgetUser.marginHeight:		1
+*mainWindow*forgetUser.orientation:		horizontal
+*mainWindow*forgetUser*labelString:		Forget : \ 
+*mainWindow*forgetUser*value:			1000
+*mainWindow*forgetUser*columns:			5
+*mainWindow*ave.borderWidth:			1
+*mainWindow*ave.marginHeight:			1
+*mainWindow*ave.orientation:			horizontal
+*mainWindow*ave*labelString:			Average : \ 
+*mainWindow*ave*value:				1
+*mainWindow*ave*columns:			5
+*mainWindow*add.labelString:			+
+*mainWindow*add.indicatorOn:			False
+*mainWindow*add.shadowThickness:		1
+*mainWindow*XmArrowButtonGadget.shadowThickness:1
+!
+!	Hardcopy dialogs
+!
+*gifHardcopyFile_popup*title:			Select the destination GIF file
+*psHardcopyFile_popup*title:			Select the destination PS file
+*aiHardcopyFile_popup*title:			Select the destination Illustrator file
+*pngHardcopyFile_popup*title:			Select the destination PNG file
+*cgmHardcopyFile_popup*title:			Select the destination CGM file
+*svgHardcopyFile_popup*title:			Select the destination SVG file
+!
+!	Channel selections
+!
+*selections*dialogTitle:					Selections
+*selections*okLabelString:					Done
+*selections*choice.orientation:					vertical
+*selections*choice.packing:					pack_column
+*selections*choice.numColumns:					3
+*selections*choice.spacing:					0
+*selections*choice*XmToggleButtonGadget*indicatorOn:		False
+*selections*choice*XmToggleButtonGadget*shadowThickness:	1
+*selections*choice*XmToggleButtonGadget*marginWidth:		5
+*selections*choice*XmToggleButtonGadget*marginHeight:		3
+*selections*create*labelString:					Add...
+*selections*create.marginWidth:					10
+*selections*create.marginHeight:				5
+*selections*delete*labelString:					Omit current
+*selections*delete*marginWidth:					10
+*selections*delete*marginHeight:				5
+*selections*row1*adjustLast:					False
+*selections*row1*orientation:					Horizontal
+*selections*listVisibleItemCount:				20
+*saveSels_popup*title:						Save selections for later use
+*loadSels_popup*title:						Load new channel selections
+*selections*listLabelString:					Available selections
+!
+*selections*addSelection*dialogTitle:			  Create a new selection
+*selections*addSelection*chsTitle*labelString:	          Available channels
+*selections*addSelection*chsList.visibleItemCount:	  30
+*selections*addSelection*chsList*selectionPolicy:	  extended_select
+*selections*addSelection*apply.labelString:	 	  Select
+*selections*addSelection*autoUnmanage:			  False
+*selections*addSelection*okLabelString:		  	  Add
+*selections*addSelection*cancelLabelString:		  Done
+*selections*name*labelString:				  Name : \ 
+*selections*regexp*labelString:				  Regexp : \ 
+*selections*name*value:				          New selection
+*saveSel*dialogTitle:					  Save selections
+!
+!	Projection selections
+!
+*fiddleProj*dialogTitle:			Projection items
+*fiddleProj*okLabelString:			Done
+*fiddleProj*toggleAll*labelString:		All On/Off
+*fiddleProj*autoUnmanage:			False
+*fiddleProj*allProj.orientation:		horizontal
+!
+*probeProj*dialogTitle:				Evaluate new projection
+*probeProj*okLabelString:			Accept
+*probeProj*cancelLabelString:			Discard
+*probeProj*allProj.orientation:			horizontal
+*probeProj*newLabel.labelString:		New items
+*probeProj*newLabel.fontList:		        -adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*probeProj*newLabel.alignment:			alignment_beginning
+*probeProj*oldLabel.labelString:		Existing items
+*probeProj*oldLabel.fontList:		        -adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*probeProj*oldLabel.alignment:			alignment_beginning
+!
+!	Gradient compensation
+!
+*compensation*dialogTitle:			      Adjust compensation
+*compensation*gradsTitle*labelString:	              Software gradient compensation
+*compensation*grads*none.selectColor: 		      green
+*compensation*grads*XmToggleButtonGadget.selectColor: red
+*compensation*none*labelString:			      No compensation
+*compensation*grad1*labelString:		      First-order gradient
+*compensation*grad2*labelString:		      Second-order gradient
+*compensation*grad3*labelString:		      Third-order gradient
+*compensation*grad4*labelString:		      4D compensation # 1
+*compensation*okLabelString:			      Done
+!
+!--- The general-purpose color editor
+!
+*coloredit*dialogTitle:			Color editor
+*coloredit*apply.labelString:		Apply
+*coloredit*sample.height:		100
+*coloredit*sample.recomputeSize:	false
+*coloredit*XmScale*orientation:		horizontal
+*coloredit*XmScale*showValue:		true
+*coloredit*XmScale*sliderMark:		thumb_mark
+*coloredit*red*titleString:		Red
+*coloredit*green*titleString:		Green
+*coloredit*blue*titleString:		Blue
+*coloredit*table.horizontalSpacing:	20
+*coloredit*table.marginWidth:		20
+*coloredit*table.marginHeight:		20
+*coloredit*sample.alignment:		alignment_center
+*coloredit*sample.fontList:	       -adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*coloredit*sample.labelString:		Sample
+*coloredit*autoUnmanage:		False
+*coloredit*predefRow*packing:		pack_column
+*coloredit*predefRow*numColumns:	6
+*coloredit*predefRow.orientation:	vertical
+*coloredit*predefRow.marginHeight:	10
+*coloredit*predefRow*spacing:		0
+*coloredit*predefRow*predef.marginHeight:	8
+*coloredit*predefRow*predef.marginWidth:	20
+*coloredit*predefRow*predef.shadowThickness:	1
+*coloredit*predefRow*predef.labelString:	
+
+!
+!	Color editor dialog
+!
+*colors.dialogTitle:			Edit colors
+*colors.row.packing:			pack_column
+*colors.row.numColumns:			3
+*colors.row.entryAlignment:		alignment_center
+*colors.row.XmPushButtonGadget.marginHeight: 5
+*colors.row.XmPushButtonGadget.marginWidth: 10
+*colors*back*labelString:		Strip chart background
+*colors*backFull*labelString:		Full view background
+*colors*backAve*labelString:		Ave view background
+*colors*text*labelString:		Text
+*colors*megmag*labelString:		MEG : magnetometers
+*colors*meggrad*labelString:		MEG : gradiometers
+*colors*eeg.labelString:		EEG
+*colors*stim.labelString:		Stim
+*colors*bad.labelString:		Bad channels
+*colors*cursors.labelString:		Time cursors
+*colors*events.labelString:		Event cursors
+*colors*selevent.labelString:		Selected event
+*colors*user.labelString:		Marked points
+!
+!	Scales
+!
+*scales*dialogTitle:			Adjust scales
+*scales*autoUnmanage:			False
+*scales*scalesTitle*labelString:	Settings for raw data, segments, and averages
+
+*scales*amp*labelString: 		Amplitude scales
+*scales*amp*fontList: 		 	-adobe-helvetica-bold-r-normal--14-*-iso8859-1
+
+*scales*time*labelString: 		Time scale and segments
+*scales*time*alignment:			alignment_beginning
+*scales*time*fontList: 		 	-adobe-helvetica-bold-r-normal--14-*-iso8859-1
+
+*scales*ave*labelString: 		Averages
+*scales*time*alignment:			alignment_beginning
+*scales*ave*fontList: 		 	-adobe-helvetica-bold-r-normal--14-*-iso8859-1
+
+*scales*sep.orientation:		vertical
+*scales*row.orientation:		horizontal
+
+*scales*meg*labelString:		MEG (fT/cm)
+*scales*megAxmult*labelString:		MEG axmult (cm)
+*scales*eeg*labelString:		EEG (uV)
+*scales*eog*labelString:		EOG (uV)
+*scales*ecg*labelString:		ECG (mV)
+*scales*emg*labelString:		EMG (mV)
+*scales*misc*labelString:		MISC (V)
+*scales*tspan*labelString:		Time span (s)
+*scales*apply*labelString:		Apply
+*scales*XmTextField*columns:		8
+*scales*row*adjustLast:			false
+*scales*mark*labelString:		Show stimulus markers
+*scales*showFull*labelString:		Show segments in full view
+*scales*showSample*labelString:		Show segments in sample view
+*scales*showLabels*labelString:		Show channel names
+*scales*showFrames*labelString:		Show viewport frames
+*scales*showZero*labelString:		Show zeroline and zerolevel
+*scales*labelSize*labelString:		Text size
+*scales*fullMin*labelString:		Segment min time (s)
+*scales*fullMax*labelString:		Segment max time (s)
+
+*scales*aveMult*labelString:		Scale magnification for averages
+*scales*aveBaseMin*labelString:		Average display baseline min (ms)
+*scales*aveBaseMax*labelString:		Average display baseline max (ms)
+*scales*aveBaseOnOff*labelString:	Use average display baseline
+*scales*aveTimeMin*labelString:		Average time range min (ms)
+*scales*aveTimeMax*labelString:		Average time range max (ms)
+*scales*aveTimeOnOff*labelString:	Autoscale time range
+*scales*sep.height:			15
+!
+!	Filter
+!
+*filter*dialogTitle:			Adjust filter
+*filter*autoUnmanage:			False
+*filter*filterTitle*labelString:	Filter settings
+*filter*hp*labelString:			Highpass (Hz) 
+*filter*hp_width*labelString:		Highpass transition (Hz) 
+*filter*lp*labelString:			Lowpass (Hz) 
+*filter*lp_width*labelString:		Lowpass transition (Hz) 
+*filter*eoghp*labelString:		EOG highpass (Hz) 
+*filter*eoghp_width*labelString:	EOG highpass transition (Hz) 
+*filter*eoglp*labelString:		EOG lowpass (Hz) 
+*filter*eoglp_width*labelString:	EOG lowpass transition (Hz) 
+*filter*onoff*labelString:		Filter active
+*filter*apply*labelString:		Apply
+!
+!	The full view
+!
+*fullView*allChannels*title*labelString:		Full view
+*fullView.resizePolicy:					resize_none
+*fullView.marginWidth:					5
+*fullView.marginHeight:					5
+*fullView.dialogTitle:					Full view
+*fullView.title:					Full view
+*fullView.okLabelString:				Hide
+*fullView*allChannels*plot.width:	 		500
+*fullView*allChannels*plot.height:	 		500
+*fullView*mess.labelString:				No messages yet...
+*fullView*mess.alignment:				alignment_beginning
+*fullView*mess.marginLeft:				10
+*fullView*mess.marginHeight:				5
+!
+!	The average view
+!
+*aveView*allChannels*title*labelString:			Averages
+*aveView.dialogTitle:					Averages
+*aveView.title:						Averages
+*aveView.resizePolicy:					resize_none
+*aveView.marginWidth:					5
+*aveView.marginHeight:					5
+*aveView.okLabelString:					Hide
+*aveView*allChannels*plot.width:	 		500
+*aveView*allChannels*plot.height:	 		500
+*aveView*mess.labelString:				No messages yet...
+*aveView*mess.alignment:				alignment_beginning
+*aveView*mess.marginLeft:				10
+*aveView*mess.marginHeight:				5
+!
+!	Layout selection dialog (list version)
+!
+*layoutSelList*dialogTitle:			Layouts
+*layoutSelList*okLabelString:			Done
+*layoutSelList*applyLabelString:		Default
+*layoutSelList*listLabelString:			Available layouts
+*layoutSelList*listVisibleItemCount:		20
+!
+!	Miscellaneous
+!
+*openAveDesc*dialogTitle:			Select an averaging description
+*openCovDesc*dialogTitle:			Select an covariance description
+*openProj*dialogTitle:				Select a projection
+*openProj*keepPrev*alignment:			alignment_beginning
+*openProj*keepPrev*labelString:                 Keep previous items
+*saveProj*dialogTitle:				Select a destination file
+*saveProj*includeEEG*alignment:			alignment_beginning
+*saveProj*includeEEG*labelString:		Include EEG average reference
+*saveProj*graphCompat*labelString:		Enforce compatibility with graph (MEG only)
+!
+!	Saving events
+!
+*saveEvents*dialogTitle:			Save event data
+*saveEvents*fileEvents*labelString:		Save events read from the data file
+*saveEvents*userEvents*labelString:		Save events created here
+*saveEvents*bothEdges*labelString:		Save all trigger line transitions
+*saveEvents*row.borderWidth:			1
+!
+!	Loading events
+!
+*loadEvents*dialogTitle:			Load event data (text)
+*loadEvents*filter.labelString:			Match comment with : \ 
+*loadEvents*toggleUser.labelString:		Add as user events
+*loadEvents*toggleKeep.labelString:		Keep existing events
+!
+*loadEventsFiff*dialogTitle:			Load event data (fif)
+*loadEventsFiff*filter.labelString:		Match comment with : \ 
+*loadEventsFiff*toggleUser.labelString:		Add as user events
+*loadEventsFiff*toggleKeep.labelString:		Keep existing events
+!
+!	Average display selector
+!
+*averageSel*dialogTitle:			Available averages
+*averageSel*sw.scrollingPolicy:			automatic
+*averageSel*sw.width:				500
+*averageSel*sw.height:				500
+*averageSel*aveName.fontList: 			-adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*averageSel*catColor.labelString:		Color...
+*averageSel*aveDelete.labelString:		Delete
+*averageSel*aveProj.labelString:		Proj...
+*averageSel*aveComp.labelString:		Comp...
+*averageSel*aveLog.labelString:			Log...
+*averageSel*aveSave.labelString:		Save...
+*averageSel*table*XmToggleButtonGadget.alignment:	alignment_beginning
+*averageSel*table*aveName.alignment:		alignment_beginning
+*averageSel*mainRow.orientation:		vertical
+*averageSel*okLabelString:			Done
+*averageSel.resizePolicy:			resize_any
+*saveAve.dialogTitle:				Save averages
+*saveEvoked.dialogTitle:			Save averages
+!
+!	EventList
+!
+*eventList_popup*dialogTitle:		Events
+*eventList*okLabelString:		Done
+*eventList*applyLabelString:		Go to
+*eventList*listLabelString:		Events
+*eventList*showUserEvents.labelString:	User-defined events only
+*eventList*showUserEvents.alignment:	alignment_beginning
+*eventList*deleteUserEvent.labelString:	Delete a user-defined event
+*eventList*deleteUserEvent.alignment:	alignment_beginning
+*eventList*subrow*adjustLast		False
+*eventList*deleteUserEvent.marginWidth:  10
+*eventList*deleteUserEvent.marginHeight: 5
+!
+!	Annotator
+!
+*annot_popup*dialogTitle:	Annotator
+*annot*sw.scrollingPolicy:	automatic
+*annot*sw.width:		450
+*annot*sw.height:		500
+*annot*but*labelString:		Mark
+*annot*canvas.orientation:	vertical
+*annot*subrow.orientation:	horizontal
+*annot*subrow.packing:		pack_tight
+*annot*no.columns:		4
+*annot*comment.columns:		30
+*annot*okLabelString:		Done
+*annot*save*labelString:	Save defs
+*annot*cancelLabelString:	Load defs
+*annot*autoUnmanage:		False
+!
+!	Averaging preferences
+!
+*avePref*dialogTitle:			Adjust averaging preferences
+*avePref*autoUnmanage:			False
+*avePref*avePrefTitle*labelString:	Preferences
+*avePref*stimIgnore*labelString:        Ignore around stimulus (ms)
+*avePref*megGrad*labelString:		MEG grad rejection (fT/cm)
+*avePref*megMag*labelString:		MEG mag rejection (fT)
+*avePref*eeg*labelString:		EEG rejection (uV)
+*avePref*eog*labelString:		EOG rejection (uV)
+*avePref*ecg*labelString:		ECG rejection (mV)
+*avePref*megGradFlat*labelString:	MEG grad no signal (fT/cm)
+*avePref*megMagFlat*labelString:	MEG mag no signal (fT)
+*avePref*eegFlat*labelString:		EEG no signal (uV)
+*avePref*eogFlat*labelString:		EOG no signal (uV)
+*avePref*ecgFlat*labelString:		ECG no signal (mV)
+*avePref*tmin*labelString:		Starting time (ms)
+*avePref*tmax*labelString:		Ending time (ms)
+*avePref*apply*labelString:		Apply
+*avePref*okLabelString:			Done
+*avePref*row2.orientation:              horizontal
+*avePref*XmTextField*columns:		6
+*avePref*skew*labelString:              Fix trigger skew
+*avePref*skew.alignment:              	alignment_beginning
+*avePref*color*labelString:		Trace color...
+*avePref*color*marginHeight:		5
+*avePref*color*marginWidth:		10
+*avePref*color.alignment:		alignment_center
+!
+!	Covariance matrices
+!
+*saveRawCov*dialogTitle:		Compute raw data covariance
+*saveRawCov*tmin*labelString:		Start time (s)
+*saveRawCov*tmax*labelString:		End   time (s)
+*saveRawCov*XmTextField*columns:	12
+*saveRawCov*tmin*value:			0
+*saveRawCov*tmax*value:			1000
+*saveRawCov*adjustLast:			False
+!
+!	SSP calculation
+!
+*makeSSP.dialogTitle:                   Compute a new SSP operator
+*makeSSP*autoUnmanage:			False
+*makeSSP*tmin*labelString:		Start time (s)\ 
+*makeSSP*tmax*labelString:		End   time (s)\ 
+*makeSSP*event*labelString:		Event to use (<= 0 for continuous)\ 
+*makeSSP*XmTextField*columns:		12
+*makeSSP*tmin*value:			0
+*makeSSP*tmax*value:			1000
+*makeSSP*event*value:			-1
+*makeSSP*adjustLast:			False
+*makeSSP.okLabelString:			Compute
+!*makeSSP*Xmsh_working.okLabelString:	Ok
+!*makeSSP*Xmsh_working.dialogTitle:	Calculating...
+!
+!	Average log file
+!
+*aveLog*dialogTitle:			Detailed averaging info
+*aveLog*logTitle*labelString:		Data from the averaging process
+*aveLog*logText*rows:			24
+*aveLog*logText*columns:		60
+*aveLog*logText*fontList:             	-adobe-courier-medium-r-normal--14-*-iso8859-1
+!
+!	Derivations
+!
+*defineDeriv*dialogTitle:			Define derivations
+*defineDeriv*derivComp.orientation:		horizontal
+*defineDeriv*chsList*visibleItemCount:		10
+*defineDeriv*name*labelString:			Name :\ 
+*defineDeriv*times*labelString:		        \ *\ 
+*defineDeriv*name*columns:			15
+*defineDeriv*name*value:			New
+*defineDeriv*weight*columns:			5
+*defineDeriv*equals*labelString:		\ =\ 
+*defineDeriv*plus*labelString:			\ +\ 
+*defineDeriv*plus.fontList:		       	-adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*defineDeriv*times.fontList:		       	-adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*defineDeriv*equals.fontList:		       	-adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*defineDeriv*times.marginTop:			10
+*defineDeriv*derivCompTitle.labelString: 	New derivation
+*defineDeriv*derivComp.entryVerticalAlignment: 	alignment_baseline_top
+*defineDeriv*captionForm*leftAttachment:	attach_form
+*defineDeriv*captionForm*topAttachment:		attach_form
+*defineDeriv*captionFom*rightAttachment:	attach_form
+*defineDeriv*captionForm*bottomAttachment:	attach_none
+*defineDeriv*okLabelString:			Add
+*defineDeriv*define*labelString:		Define
+*defineDeriv*autoUnmanage:			False
+*defineDeriv*derivTextTitle.labelString:	Existing derivations
+*defineDeriv*derivText*rows:			10
+*defineDeriv*helpLabel*alignment:		alignment_center
+*defineDeriv*helpLabel*labelString:		Enter the expression in "New derivation" and click "Add" \n\
+You can also edit the expressions directly in "Existing derivations" \n\
+Click "Define" when finished
+!
+!	Derivation loading
+!
+*loadDeriv*dialogTitle:                                         Load channel derivations
+*loadDeriv*keepPrev*alignment:					alignment_beginning
+*loadDeriv*keepPrev*labelString:                 		Keep previous derivations
+!
+!	Derivation saving
+!
+*saveDeriv*dialogTitle:                                         Save channel derivations
+
+
+
+
+
+
+
+

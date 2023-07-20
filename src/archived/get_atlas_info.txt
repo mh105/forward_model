@@ -1,0 +1,49 @@
+#!/bin/bash
+
+#Note the start time
+start=$(date +%s)
+
+#Setup paths
+FSLDIR=/Users/alexhe/Applications/fsl
+CODEDIR=/Users/alexhe/Dropbox/Mac_Desktop/MIT_HST/NSRL_Purdon_Prerau/EEG/code/forward_model
+CURRDIR=$PWD
+
+MAINDIR=/Users/alexhe/Dropbox/Mac_Desktop/MIT_HST/NSRL_Purdon_Prerau/forward_modeling/4layer_BEM/sample_mesh/pipelines
+HEADRECODIR=$MAINDIR/headreco
+M2MDIR=$MAINDIR/mri2mesh
+BEMDIR=$MAINDIR/bem_surfaces
+RECONDIR=/Users/alexhe/Dropbox_Personal/Mac_Desktop/MIT_HST/NSRL_Purdon_Prerau/MNE/subject_data/SLEEP_TDEL_recon
+
+
+
+
+#################################
+#
+# get the Desikan atlas aparc
+#
+#################################
+
+cd $BEMDIR/final_structure
+mkdir temp_recon
+mkdir temp_recon/surf
+mkdir temp_recon/label
+cp $BEMDIR/final_surface/mri2mesh_fs_lh_wm_fixed.surf temp_recon/surf/lh.white
+cp $M2MDIR/fs*/surf/lh.sphere temp_recon/surf/lh.sphere
+cp $BEMDIR/final_surface/mri2mesh_fs_rh_wm_fixed.surf temp_recon/surf/rh.white   
+cp $M2MDIR/fs*/surf/rh.sphere temp_recon/surf/rh.sphere
+cp $M2MDIR/fs*/label/*aparc.annot temp_recon/label
+
+#make a copy of the atlas_templates.csv to the current folder
+cp $CODEDIR/atlas_templates.csv $BEMDIR/final_structure/atlas_templates.csv
+
+#save the atlas info to mat
+python $CODEDIR/get_atlas_info.py
+
+#remove the temporary files
+rm -r temp_recon
+rm atlas_templates.csv
+
+
+
+#Go back to the original directory
+cd $CURRDIR 

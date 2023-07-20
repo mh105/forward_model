@@ -1,0 +1,38 @@
+The MNE software will compute cortically-constrained L2
+minimum-norm current estimates and associated dynamic
+statistical parametric maps from MEG and EEG data,
+optionally constrained by fMRI. This software includes MEG
+and EEG preprocessing tools, interactive and batch-mode
+modules for the forward and inverse calculations, as well
+as various data conditioning and data conversion utilities.
+
+In addition to the compiled C code tools, MNE Software
+includes a Matlab toolbox which facilitates access to the
+fif (functional image file) format data files employed in
+the MNE software and enables development of custom analysis
+tools based on the intermediate results computed with the
+MNE tools. In contrast to other Matlab tools which provide
+access to fif files, the MNE toolbox is written without
+resorting to compiled code and is thus composed entirely
+of m-files.
+
+MNE tools support analysis of data from all three major MEG
+manufacturers. The Elekta-Neuromag Vectorview and
+Neuromag-122 data can be directly accessed because the
+Neuromag native file format is employed in the processing
+stream. We have also written a conversion utility from the
+CTF MEG system native format to fif. The 4D Magnes software
+includes a conversion tool to fif. We have added a utility
+to incorporate the signals from the compensation data
+channels as well. The MNE tools are aware of the major noise
+compensation methods employed for MEG data and apply the
+necessary corrections in forward calculations and noise
+estimation procedures as appropriate. Specifically, we
+support the signal-space projection (SSP) and signal-space
+separation (SSS) methods employed in Elekta-Neuromag systems
+and software gradient compensation using reference sensors
+for CTF and 4D Magnes data.
+
+The MNE tools have been written in C and Matlab. Currently,
+the software is available for both 32-bit and 64-bit LINUX
+systems and for Mac OSX (Intel processors).

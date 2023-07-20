@@ -1,0 +1,67 @@
+#!/bin/tcsh -ef
+#
+#   Script to set matlab lib path, for use in wrapper scripts which
+#   need the matlab shared libs.  This setup is not done in the main
+#   mne_setup because doing so pollutes the entire environment.
+#
+#   Copyright 2009
+#
+#   Nick Schmansky
+#   Athinoula A. Martinos Center for Biomedical Imaging
+#   Massachusetts General Hospital
+#   Charlestown, MA, USA
+#
+
+set OS=(`uname -s`)
+set PROC=(`uname -p`)
+
+#
+# check for MATLAB_ROOT and exit if not found
+#
+if ( ! $?MATLAB_ROOT ) then
+    echo "ERROR: The environment variable MATLAB_ROOT is not defined!"
+    echo "       Set MATLAB_ROOT to the directory where Matlab is installed."
+    exit 1
+endif
+if ( ! -e $MATLAB_ROOT ) then
+    echo "ERROR: $MATLAB_ROOT "
+    echo "       does not exist. Check that this value is correct.";
+    exit 1
+endif
+
+#
+# add appropriate matlab lib dir to (DY)LD_LIBRARY_PATH
+#
+if ( "x$OS" == "xLinux" ) then
+    if ( "x$PROC" == "xx86_64" ) then
+        set MATLAB_LIB_PATH=($MATLAB_ROOT/bin/glnxa64)
+    else
+        set MATLAB_LIB_PATH=($MATLAB_ROOT/bin/glnx86)
+    endif
+    if ( ! -e $MATLAB_LIB_PATH ) then
+        echo "$MATLAB_LIB_PATH does not exist! Unknown Matlab installation."
+    else
+        if ( $?LD_LIBRARY_PATH ) then
+            set LD_LIBRARY_PATH=("$MATLAB_LIB_PATH":"$LD_LIBRARY_PATH")
+        else
+            set LD_LIBRARY_PATH=$MATLAB_LIB_PATH
+        endif
+        setenv LD_LIBRARY_PATH $LD_LIBRARY_PATH
+    endif
+else if ( "x$OS" == "xDarwin" ) then
+    if ( "x$PROC" == "xi386" ) then
+        set MATLAB_LIB_PATH=($MATLAB_ROOT/bin/maci)
+    else
+        set MATLAB_LIB_PATH=($MATLAB_ROOT/bin/mac)
+    endif
+    if ( ! -e $MATLAB_LIB_PATH ) then
+        echo "$MATLAB_LIB_PATH does not exist! Unknown Matlab installation."
+    else
+        if ( $?DYLD_LIBRARY_PATH ) then
+            set DYLD_LIBRARY_PATH=("$MATLAB_LIB_PATH":"$DYLD_LIBRARY_PATH")
+        else
+            set DYLD_LIBRARY_PATH=$MATLAB_LIB_PATH
+        endif
+        setenv DYLD_LIBRARY_PATH $DYLD_LIBRARY_PATH
+    endif
+endif

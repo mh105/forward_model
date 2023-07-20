@@ -1,0 +1,200 @@
+#!/bin/sh
+#
+#	Set up the MRIs for viewing with mrilab
+#
+#       Copyright 2006
+#
+#       Matti Hamalainen
+#       Athinoula A. Martinos Center for Biomedical Imaging
+#       Massachusetts General Hospital
+#       Charlestown, MA, USA
+#
+#       $Id: mne_setup_mri 2970 2009-11-09 12:13:49Z msh $
+#
+#       Revision 1.11  2008/11/17 03:35:34  msh
+#       Make use of the --mgh option in mne_make_cor_set
+#
+#       Revision 1.10  2008/10/08 13:05:15  msh
+#       Directory can be now specified in the --mri option
+#
+#       Revision 1.9  2006/10/04 12:50:59  msh
+#       Use the new program launching utilities
+#
+#       Revision 1.8  2006/04/20 12:54:32  msh
+#       Deleted the script mne_template_mne
+#       Obsoluted NEURO_ROOT
+#       Use mne_make_cor_set instead of create_mri_sets_simple in mne_setup_mri
+#
+#
+cleanup()
+{
+    echo "Temporary files removed."
+}
+usage()
+{
+    echo "usage: $0 [options]"
+    echo 
+    echo "     --help                  show this text"
+    echo "     --subject subject       (defaults to SUBJECT environment variable)"
+    echo "     --mri     name          (name of the set to set up, default = brain and T1)"
+    echo "     --overwrite             to overwrite existing data"
+    echo 
+    echo "Minimal invocation:"
+    echo
+    echo "$0                      (SUBJECTS environment variable set)"
+    echo "$0 --subject subject    (define subject on the command line)"
+    echo 
+}
+#
+if [ ! "$SUBJECTS_DIR" ] ; then
+    echo "The environment variable SUBJECTS_DIR should be set"
+    exit 1
+fi
+if [ ! "$MNE_ROOT" ] ; then
+    echo "MNE_ROOT environment variable is not set"
+    exit 1
+fi
+#
+#
+#
+force=false
+mri="T1 brain"
+first_mri_opt=true
+#
+#	Parse the options
+#
+while [ $# -gt 0 ] ; do
+    case "$1" in  
+	--subject) 
+shift
+if [ $# -eq 0 ]; then
+	echo "--subject: argument required."
+	exit 1
+else
+    export SUBJECT=$1
+fi
+;;
+--mri) 
+    shift
+    if [ $# -eq 0 ] ; then
+	    echo "--mri: argument required."
+	    exit 1
+    else 
+	if [ $first_mri_opt = true ] ; then
+	    first_mri_opt=false
+	    mri=$1
+	else
+	    mri="$mri $1"
+	fi
+    fi
+    ;;
+    --overwrite)
+	force=true
+	;;
+	--help)
+	usage
+	exit 1
+	;;
+	esac
+
+	shift
+done
+#
+#
+#	Check everything is alright
+#
+if [ ! "$SUBJECT" ] ; then
+    usage
+    exit 1
+fi
+#
+subject_dir=$SUBJECTS_DIR/$SUBJECT
+mri_dir=$subject_dir/mri
+#
+if [ ! -d $subject_dir ] ; then
+    echo "Could not find the MRI data directory $subject_dir"
+    exit 1
+fi
+if [ ! -d $mri_dir ] ; then
+    echo "Could not find the MRI directory $mri_dir"
+    exit 1
+fi
+for this in $mri ; do
+    echo $this | grep '/' >/dev/null
+    if [ $? -eq 0 ] ; then
+	this_dir=`dirname $this`/`basename $this`
+	this_mgz=`dirname $this`/`basename $this`.mgz
+	neuromag_dir=`dirname $this`/`basename $this`-neuromag
+    else
+	this_dir=$mri_dir/$this
+	this_mgz=$mri_dir/$this.mgz
+	neuromag_dir=$mri_dir/$this-neuromag
+    fi
+    echo "-----------------------------------------------------------------------------------------------"
+    echo "Setting up $this..."
+    if [ ! -d "$this_dir" -a ! -f "$this_mgz" ]
+	then
+	echo "Could not find the MRI data"
+	exit 1
+    fi
+    if [ -d "$neuromag_dir" -a $force = false ]
+	then
+	echo "Destination directory $neuromag_dir already exists."
+	echo "Use --overwrite option to overwrite existing data."
+	exit 1
+    fi
+#
+#	Create the necessary directories
+#	
+    mkdir -p $neuromag_dir/sets
+    if [ $? -ne 0 ] ; then
+	echo "Could not create sets under directory $neuromag_dir"
+	exit 1
+    fi
+    mkdir -p $neuromag_dir/slices
+    if [ $? -ne 0 ] ; then
+	echo "Could not create slices under directory $neuromag_dir"
+	exit 1
+    fi
+#
+#       Expand the mgz file if necessary
+#
+    if [ ! -f $this_mgz ] ; then 
+#
+#       Just need the symbolic links
+# 
+	echo "Linking COR files into $neuromag_dir/slices..."
+	cd $neuromag_dir/slices
+	rm -f COR-[0-9]* 
+	ln -s ../../$this/COR-[0-9]* .
+	if [ $? -ne 0 ] ; then 
+	    echo "Could not complete the symbolic links to directory $neuromag_dir"
+	    rm -f $neuromag_dir/slices/*
+	    exit 1
+	fi
+	cd - >/dev/null
+    fi
+#
+#       Create the set file
+#
+    rm -f $neuromag_dir/sets/COR.fif
+    cd $neuromag_dir/sets
+    if [ $? -ne 0 ] ; then
+	echo "Could not change to directory $neuromag_dir/sets"
+	exit 1
+    fi
+    echo "Creating $neuromag_dir/sets/COR.fif..."
+    if [ -f $this_mgz ] ; then
+	mne_make_cor_set --mgh $this_mgz --out COR.fif
+    else
+	mne_make_cor_set --dir ../slices --out COR.fif
+    fi
+    echo "Created $neuromag_dir/sets/COR.fif"
+    cd - >/dev/null
+
+done
+echo "-----------------------------------------------------------------------------------------------"
+echo
+echo "Complete."
+echo
+exit 0

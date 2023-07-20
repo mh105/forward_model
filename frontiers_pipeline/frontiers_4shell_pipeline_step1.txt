@@ -1,0 +1,130 @@
+#!/bin/bash
+
+set -e 
+
+# This is an automated pipeline to build 4-shell forward models in the Purdonlab.
+# Reference:
+# He, M., Liu, F., Nummenmaa, A., Hämäläinen, M., Dickerson, B. C., & Purdon, P. L. (2021). Age-Related EEG Power Reductions Cannot Be Explained by Changes of the Conductivity Distribution in the Head Due to Brain Atrophy. Frontiers in aging neuroscience, 26.
+
+# Last edit: Alex He 10/06/2022
+
+
+
+# Note the start time
+start=$(date +%s)
+
+# Store the current directory to get back after the pipeline 
+CURRDIR=$PWD
+
+
+
+##################################
+# STEP 1: Run SimNIBS Pipelines
+##################################
+
+# Define subject directory - this should follow the conventions of MRI subject folders
+# Example:
+# +---ABEN_F_54
+# |	+---analysis
+# |	+---channel
+# |	+---clinical
+# |	+---fastscan
+# |	+---log
+# |	+---raw
+# |	+---set
+# |	+---task
+# |	+---temp
+# |	+---mri <<< this is the subject directory for <SUBDIR>
+# |	|   +---dicom
+# |	|   +---pib
+# |	|   +---t807
+# |	|   +---raw
+# |	|   +---recons
+# |	|   |   +---FS6
+# |	|   |   |   +---label
+# |	|   |   |   +---mri
+# |	|   |   |   +---scripts
+# |	|   |   |   +---stats
+# |	|   |   |   +---surf
+# |	|   |   |   +---tmp
+# |	|   |   |   +---touch
+# |	|   |   |   +---trash
+
+# Get user input of subject directory as a full path
+if [ -z "$SUBDIR" ]
+then
+    echo ""
+    ls /autofs/cifs/adsleepeeg/archive/subject_data
+    echo ""
+    read -p "SUBDIR=" SUBDIR
+fi
+
+if [[ ! "$SUBDIR" == *"/"* ]]
+then
+    echo "Shorthand SUBDIR detected. Automatically appending /autofs/cifs/adsleepeeg/archive/subject_data/*/mri."
+    SUBDIR=/autofs/cifs/adsleepeeg/archive/subject_data/$SUBDIR/mri
+fi
+
+# Using space-holder subject ID for SimNIBS pipelines
+SUBID=FS6
+
+MAINDIR=$SUBDIR/simnibs_pipe
+RECONDIR=$SUBDIR/recons/FS6
+
+mkdir $MAINDIR
+mkdir $MAINDIR/headreco
+mkdir $MAINDIR/mri2mesh
+
+# Copy needed raw volumes to the MAINDIR for simnibs_pipe - these should already be unpacked following post-MRI processing manual
+cp $RECONDIR/mri/orig/001.mgz $MAINDIR/001.mgz
+for f in $SUBDIR/raw/FLASH05deg_rms/0*; do
+	cp "$f/flash5_rms.mgz" $MAINDIR/flash5_rms.mgz
+done
+
+# Convert volumes to NIFTI format
+cd $MAINDIR
+mri_convert 001.mgz 001.nii
+mri_convert flash5_rms.mgz flash5_rms.nii
+
+# Copy to the separate pipeline directories
+cp 001.nii headreco/001.nii
+cp 001.nii mri2mesh/001.nii
+cp flash5_rms.nii headreco/flash5_rms.nii
+cp flash5_rms.nii mri2mesh/flash5_rms.nii
+
+# Run headreco pipeline
+cd $MAINDIR/headreco
+headreco all $SUBID 001.nii flash5_rms.nii
+
+# Run mri2mesh pipeline
+cd $MAINDIR/mri2mesh
+mri2mesh --all $SUBID 001.nii flash5_rms.nii
+
+##################################
+# End of STEP 1
+##################################
+unset SUBDIR
+echo ""
+echo "frontiers_4shell_pipeline_step1.txt completed without error."
+echo ""
+
+
+
+# Go back to the original directory
+cd $CURRDIR 
+
+# Report time taken to run this script 
+
+secs_to_human() {
+    if [[ -z ${1} || ${1} -lt 60 ]] ;then
+        min=0 ; secs="${1}"
+    else
+        time_mins=$(echo "scale=2; ${1}/60" | bc)
+        min=$(echo ${time_mins} | cut -d'.' -f1)
+        secs="0.$(echo ${time_mins} | cut -d'.' -f2)"
+        secs=$(echo ${secs}*60|bc|awk '{print int($1+0.5)}')
+    fi
+    echo "Time taken for STEP 1 : ${min} minutes and ${secs} seconds."
+}
+
+secs_to_human "$(($(date +%s) - ${start}))"

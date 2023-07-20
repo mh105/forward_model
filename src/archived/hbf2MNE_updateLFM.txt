@@ -1,0 +1,24 @@
+#!/bin/bash
+
+#Setup paths 
+CODEDIR=/Users/alexhe/Dropbox/Mac_Desktop/MIT_HST/NSRL_Purdon_Prerau/EEG/code/forward_model/src
+CURRDIR=$PWD
+
+MAINDIR=/Users/alexhe/Dropbox/Mac_Desktop/MIT_HST/NSRL_Purdon_Prerau/forward_modeling/4layer_BEM/sample_mesh/pipelines
+BEMDIR=$MAINDIR/bem_surfaces
+
+
+#################################
+#
+# Update fif files with LFM
+#
+#################################
+
+cd $BEMDIR/final_structure
+
+#Update [sol][data] in fwd with hbf computed LFM and save as new fif
+python $CODEDIR/hbf2MNE_updateLFM.py
+
+
+#Go back to the original directory
+cd $CURRDIR 

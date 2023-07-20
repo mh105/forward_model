@@ -1,0 +1,23 @@
+#! /bin/tcsh -ef
+
+# each executable should output a version string when passed --version
+# and it should look something like this:
+#
+# mne_analyze version 2.53 compiled at Nov  1 2009 19:34:58
+#
+# so for a simple test, we'll just grep on some expected items.
+# this just checks for simple execution.
+
+# if optional setup is passed, eg mne_setup_matlab_csh, then source it
+if ("$3" != "") source $3
+
+$1 --version
+set testfile=(/tmp/mnetesttmp.$$)
+$1 --version >& $testfile
+grep -w $2 $testfile
+grep -w version $testfile
+grep "compiled at" $testfile
+rm -f $testfile
+
+# note: the -e option to tcsh will exit on any error, so an execute or grep 
+# failure would return immediately with the error code, indicating test failure

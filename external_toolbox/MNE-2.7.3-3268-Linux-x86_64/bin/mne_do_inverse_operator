@@ -1,0 +1,369 @@
+#!/bin/sh
+#
+#	This script greatly simplifies the inverse calculations
+#
+#       Copyright 2006
+#
+#       Matti Hamalainen
+#       Athinoula A. Martinos Center for Biomedical Imaging
+#       Massachusetts General Hospital
+#       Charlestown, MA, USA
+#
+#       $Id: mne_do_inverse_operator 3181 2010-06-04 02:05:08Z msh $
+#
+#       Revision 1.5  2008/10/03 14:31:30  msh
+#       mne_inverse_operator was specified twice on the compose command line.
+#       The new mne_inverse_operator complains about this
+#
+#       Revision 1.4  2006/10/04 12:50:59  msh
+#       Use the new program launching utilities
+#
+#
+usage()
+{
+	echo "usage: $0 [options]"
+	echo
+	echo "      --fwd              <forward solution name>"
+	echo "      --meg              to include MEG"
+	echo "      --eeg              to include EEG"
+	echo "      --fixed            to produce fixed-orientation solution"
+	echo "      --bad              <bad chs name>"
+	echo "      --senscov          <noise covariance matrix>"
+	echo "      --noisecov         <noise covariance matrix> (synonym for the above)"
+	echo "      --noiserank        <noise covariance matrix rank>"
+	echo "      --diagnoise        to force a diagonal noise covariance matrix"
+	echo "      --srccov           <source covariance matrix>"
+	echo "      --loose            <fraction for the loose orientation constraint>"
+	echo "      --depth            to employ depth weighting."
+	echo "      --inv              <inverse operator>"
+	echo "      --destdir          <directory for the inverse operator>"
+	echo "      --fmri name        Specify the fMRI weighting file (w format)"
+	echo "      --fmrithresh val   Specify the threshold for the fMRI weighting"
+	echo "      --fmrioff    val   Specify the source variance value in locations with no fMRI activation ( 0.10 )"
+	echo "      --megreg val       Regularize the MEG noise-covariance matrix by this amount"
+	echo "      --eegreg val       Regularize the EEG noise-covariance matrix by this amount"
+	echo "      --proj name        Load the linear projection (SSP) information from here"
+	echo
+	exit 1
+}
+if [ $# -eq 0 ]
+then
+	usage
+	exit 1
+fi
+if [ ! "$MNE_ROOT" ]
+then
+    echo "MNE_ROOT environment variable is not set"
+    exit 1
+fi
+#
+#
+#
+force=false
+meg=
+eeg=
+fixed=
+inv=
+fwd=
+bad=
+srccov=
+diagnoise=
+loose=
+depth=
+fmri=
+fmrithresh=
+fmrioff=0.1
+megreg=
+eegreg=
+proj=
+noiserank=
+#
+#	Parse the options
+#
+while [ $# -gt 0 ]
+do
+	case "$1" in  
+	--fwd)
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--fwd: argument required."
+			exit 1
+		else
+			fwd=$1
+		fi
+		;;
+	--inv)
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--inv: argument required."
+			exit 1
+		else
+			inv=$1
+		fi
+		;;
+	--destdir)
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--destdir: argument required."
+			exit 1
+		else
+			destdir=$1
+		fi
+		;;
+	--bad)
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--bad: argument required."
+			exit 1
+		else
+			bad=$1
+		fi
+		;;
+	--senscov)
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--senscov: argument required."
+			exit 1
+		else
+			noise=$1
+		fi
+		;;
+	--noisecov)
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--noisecov: argument required."
+			exit 1
+		else
+			noise=$1
+		fi
+		;;
+	--noiserank)
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--noiserank: argument required."
+			exit 1
+		else
+			noiserank=$1
+		fi
+		;;
+	--diagnoise)
+		diagnoise=--diagnoise
+		;;
+	--srccov)
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--srccov: argument required."
+			exit 1
+		else
+			srccov=$1
+		fi
+		;;
+	--loose)
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--loose: argument required."
+			exit 1
+		else
+			loose=$1
+		fi
+		;;
+	--overwrite)
+		force=true
+		;;
+	--fixed)
+		fixed=--fixed
+		;;
+	--meg)
+		meg=--meg
+		;;
+	--eeg)
+		eeg=--eeg
+		;;
+	--depth)
+		depth=--depth
+		;;
+	--help)
+		usage
+		exit 1
+		;;
+	--fmri)
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--fmri: argument required."
+			exit 1
+		else
+			fmri=$1
+		fi
+		;;
+	--fmrithresh)
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--fmrithresh: argument required."
+			exit 1
+		else
+			fmrithresh=$1
+		fi
+		;;
+	--fmrioff)
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--frmioff: argument required."
+			exit 1
+		else
+			fmrioff=$1
+		fi
+		;;
+	--eegreg)
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--eegreg: argument required."
+			exit 1
+		else
+			eegreg=$1
+		fi
+		;;
+	--megreg)
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--megreg: argument required."
+			exit 1
+		else
+			megreg=$1
+		fi
+		;;
+	--proj)
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--proj: argument required."
+			exit 1
+		else
+			proj="$proj --proj $1"
+		fi
+		;;
+	esac
+
+	shift
+done
+if [ ! "$meg" -a ! "$eeg" ]
+then
+	meg=--meg
+fi
+if [ ! "$fwd" ]
+then
+	echo "Forward solution must be specified with --fwd option."
+	exit 1
+fi
+if [ ! -r "$fwd" ]
+then
+	echo "Couldn't find the forward solution $fwd."
+	exit 1
+fi
+if [ ! "$inv" ]
+then
+	inv=$(dirname $fwd)/$(basename $fwd -fwd.fif)$meg$eeg$fixed-inv.fif
+	inv=$(echo $inv | sed 's/--/-/g')
+fi
+#
+# Apply --destdir option if appropriate
+#
+if [ "$destdir" ] ; then
+    inv=`basename $inv`
+    inv=${destdir}/$inv
+fi
+if [ ! "$noise" ]
+then	
+	noise=$(dirname $fwd)/$(echo $(basename $fwd) | sed 's/-.*-fwd.fif$//g')-cov.fif
+fi
+if [ ! -f $noise ]
+then
+	echo "Couldn't find the noise covariance matrix $noise."
+	exit 1
+fi
+if [ ! "$bad" ]
+then 
+	bad=$(dirname $fwd)/$(echo $(basename $fwd) | sed 's/-.*-fwd.fif$//g').bad
+	if [ ! -r "$bad" ]
+	then
+	    unset bad
+        fi
+fi
+if [ "$bad" -a ! -f "$bad" ]
+then
+	echo "Couldn't find the bad channels file $bad."
+	exit 1
+fi
+if [ "$fmri" ]
+then
+	if [ ! "$fmrithresh" ]
+	then
+		echo "Need fmrithresh to be set."
+		exit 1
+	fi
+	if [ ! "$fmrioff" ]
+	then
+		echo "Need fmrioff to be set."
+		exit 1
+	fi
+fi
+#
+#	Go ahead and do it
+#
+inv_command="mne_inverse_operator $meg $eeg $fixed $diagnoise $depth \
+		--fwd     $fwd \
+		--senscov $noise \
+		--inv     $inv "
+if [ "$bad" ] ; then
+	inv_command="$inv_command --bad $bad"
+fi
+if [ "$srccov" ] ; then
+	inv_command="$inv_command --srccov $srccov"
+fi
+if [ "$loose" ] ; then
+	inv_command="$inv_command --loose $loose"
+fi
+if [ "$megreg" ] ; then
+    inv_command="$inv_command --magreg $megreg --gradreg $megreg"
+fi
+if [ "$eegreg" ] ; then
+    inv_command="$inv_command --eegreg $eegreg"
+fi
+if [ "$proj" ] ; then
+	inv_command="$inv_command $proj"
+fi
+if [ "$fmri" ] ; then
+	inv_command="$inv_command  \
+		--fmri $fmri \
+		--fmrithresh $fmrithresh \
+		--fmrioff $fmrioff"
+fi
+if [ "$noiserank" ] ; then
+    inv_command="$inv_command --noiserank $noiserank"
+fi
+$inv_command
+if [ $? != 0 ]
+then
+	echo "Inverse operator decomposition failed (see above)"
+	exit 1
+fi
+#
+echo
+exit 0
+
+
+
+

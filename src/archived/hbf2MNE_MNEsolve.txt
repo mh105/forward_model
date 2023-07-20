@@ -1,0 +1,53 @@
+#!/bin/bash
+
+#Setup paths 
+CODEDIR=/Users/alexhe/Dropbox/Mac_Desktop/MIT_HST/NSRL_Purdon_Prerau/EEG/code/forward_model/src
+CURRDIR=$PWD
+
+MAINDIR=/Users/alexhe/Dropbox/Mac_Desktop/MIT_HST/NSRL_Purdon_Prerau/EEG/data/March22_grant_preliminary/Forward_model/SLEEP_BMCC_M_55/simnibs_pipe
+BEMDIR=$MAINDIR/bem_surfaces
+RECONDIR=/Users/alexhe/Dropbox/Mac_Desktop/MIT_HST/NSRL_Purdon_Prerau/EEG/data/March22_grant_preliminary/Forward_model/SLEEP_BMCC_M_55/recons/FS6
+
+
+
+#################################
+#
+# MNE forward model on bmeshes
+#
+#################################
+# we need to configure the bmeshes BEM surfaces as acceptable by MNE and use MNE to compute the lead field matrix and save them
+
+#Create fake recon folder
+cd $BEMDIR/final_structure
+mkdir temp_recon
+mkdir temp_recon/bem
+
+#Convert mat file to .surf
+python $CODEDIR/hbf2MNE_savesurf.py
+
+#Move the surfaces to the fake recon folder
+mv *.surf temp_recon/bem
+
+#Create one for the original MNE BEM surfaces as comparison
+mkdir temp_MNE_recon
+mkdir temp_MNE_recon/bem
+
+#Cp the surf files over to the fake recon folder
+cp $RECONDIR/bem/*.surf temp_MNE_recon/bem
+
+#MNE forward modeling and save the lead field matrices
+python $CODEDIR/hbf2MNE_fwdmodel.py ico3
+
+#Remove temporary folders
+rm -rf temp*
+
+
+
+
+
+
+
+
+
+#Go back to the original directory
+cd $CURRDIR 

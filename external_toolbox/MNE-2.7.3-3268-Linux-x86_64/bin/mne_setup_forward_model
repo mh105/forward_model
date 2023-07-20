@@ -1,0 +1,446 @@
+#!/bin/sh
+#
+#	This script simplifies the BEM model creation...
+#
+#       Copyright 2006
+#
+#       Matti Hamalainen
+#       Athinoula A. Martinos Center for Biomedical Imaging
+#       Massachusetts General Hospital
+#       Charlestown, MA, USA
+#
+#
+#       $Id: mne_setup_forward_model 2970 2009-11-09 12:13:49Z msh $
+#
+#       Revision 1.8  2008/03/11 02:24:45  msh
+#       Conform to the new mne_list_bem format
+#
+#       Revision 1.7  2007/11/09 20:34:32  msh
+#       Added --outershift and --scalpshift options
+#
+#       Revision 1.6  2006/10/04 12:50:59  msh
+#       Use the new program launching utilities
+#
+#       Revision 1.5  2006/08/21 01:55:23  msh
+#       Added --innershift option
+#
+#       Revision 1.4  2006/04/20 12:56:02  msh
+#       Removed reference to NEURO_ROOT
+#
+#
+#
+# default values
+#
+force=false
+homog=false
+prepare=true
+swap=--swap
+surf=false
+ico=
+swap=--swap
+inner_shift=0.0
+outer_shift=0.0
+scalp_shift=0.0
+meters=
+brainc=0.3
+skullc=0.006
+scalpc=0.3
+#
+usage()
+{
+    echo "usage: $0 [options]"
+    echo
+    echo "     --subject    subject"
+    echo "     --scalpc     scalp conductivity [S/m] (default = $scalpc S/m)"
+    echo "     --skullc     skull conductivity [S/m] (default = $skullc S/m)"
+    echo "     --brainc     brain conductivity [S/m] (default = $brainc S/m)"
+    echo "     --model      BEM model name"
+    echo "     --homog      Make a single-compartment model"
+    echo "     --surf       Use binary surface files instead of tri files as input"
+    echo "     --ico number Will downsample the surface to the designated subdivision of an icosahedron."
+    echo "                  This requires that the surface is isomorphic with a higher-level subdivision."
+    echo "                  This option is mainly useful for downsampling surfaces produced by mri_watershed."
+    echo "     --nosol      Omit the solution preparation step."
+    echo "     --noswap     Do not swap triangle vertices (assume counterclockwise ordering). Only effective for tri files"
+    echo "     --meters     Triangulation coordinates are in meters. Only effective for tri files"
+    echo "     --innershift shift [mm] Shift inner skull outwards by this amount (mm)"
+    echo "     --outershift shift [mm] Shift outer skull outwards by this amount (mm)"
+    echo "     --scalpshift shift [mm] Shift scalp skull outwards by this amount (mm)"
+    echo
+    echo "Minimal invocation:"
+    echo
+    echo "$0                      (SUBJECT environment variable set)"
+    echo "$0 --subject subject    (define subject on the command line)"
+    echo
+}
+#
+if [ ! "$SUBJECTS_DIR" ]
+then
+	echo "The environment variable SUBJECTS_DIR should be set"
+	exit 1
+fi
+if [ ! "$MNE_ROOT" ]
+then
+    echo "MNE_ROOT environment variable is not set"
+    exit 1
+fi
+#
+#	Parse the options
+#
+while [ $# -gt 0 ]
+do
+	case "$1" in  
+	--subject) 
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--subject: argument required."
+			exit 1
+		else
+			export SUBJECT=$1
+		fi
+		;;
+	--scalpc) 
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--scalpc: argument required."
+			exit 1
+		else
+			scalpc=$1
+		fi
+		;;
+	--skullc) 
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--skullc: argument required."
+			exit 1
+		else
+			skullc=$1
+		fi
+		;;
+	--brainc) 
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--brainc: argument required."
+			exit 1
+		else
+			brainc=$1
+		fi
+		;;
+	--model) 
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--model: argument required."
+			exit 1
+		else
+			model=$1
+		fi
+		;;
+	--ico) 
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--ico: argument required."
+			exit 1
+		else
+			ico=$1
+		fi
+		;;
+	--overwrite)
+		force=true
+		;;
+	--homog)
+		homog=true
+		;;
+	--surf)
+		surf=true
+		;;
+	--noswap) 
+		swap=
+		;;
+	--meters) 
+		meters="--meters"
+		;;
+	--nosol)
+		prepare=false
+		;;
+	--innershift) 
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--innershift: argument required."
+			exit 1
+		else
+			inner_shift=$1
+		fi
+		;;
+	--outershift) 
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--outershift: argument required."
+			exit 1
+		else
+			outer_shift=$1
+		fi
+		;;
+	--scalpshift) 
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--scalpshift: argument required."
+			exit 1
+		else
+			scalp_shift=$1
+		fi
+		;;
+        --help)
+		usage
+		exit 1
+		;;
+	esac
+
+	shift
+done
+#
+#	Check everything is alright
+#
+if [ ! "$SUBJECT" ]
+then
+	usage
+	exit 1
+fi
+#
+subject_dir=$SUBJECTS_DIR/$SUBJECT
+surf_dir=$subject_dir/surf
+bem_dir=$subject_dir/bem
+if [ $surf = true ]
+then
+    inner_skull=$bem_dir/inner_skull.surf
+    outer_skull=$bem_dir/outer_skull.surf
+    outer_skin=$bem_dir/outer_skin.surf
+    if [ ! -r $inner_skull ] ; then
+	inner_skull1=$inner_skull
+	inner_skull=$bem_dir/${SUBJECT}-inner_skull.surf
+	outer_skull=$bem_dir/${SUBJECT}-outer_skull.surf
+	outer_skin=$bem_dir/${SUBJECT}-outer_skin.surf
+	if [ ! -r $inner_skull ] ; then
+	    echo "Could not find the inner skull triangulation $inner_skull1 or $inner_skull"
+	    exit 1
+	fi
+    fi
+else
+    inner_skull=$bem_dir/inner_skull.tri
+    outer_skull=$bem_dir/outer_skull.tri
+    outer_skin=$bem_dir/outer_skin.tri
+    if [ ! -r $inner_skull ] ; then
+	inner_skull1=$inner_skull
+	inner_skull=$bem_dir/${SUBJECT}-inner_skull.tri
+	outer_skull=$bem_dir/${SUBJECT}-outer_skull.tri
+	outer_skin=$bem_dir/${SUBJECT}-outer_skin.tri
+	if [ ! -r $inner_skull ] ; then
+	    echo "Could not find the inner skull triangulation $inner_skull1 or $inner_skull"
+	    exit 1
+	fi
+    fi
+fi
+#
+if [ ! -d $subject_dir ]
+then 
+	echo "Could not find the MRI data directory $subject_dir"
+	exit 1
+fi
+if [ ! -d $bem_dir ]
+then 
+	echo "Could not find the BEM directory $bem_dir"
+	exit 1
+fi
+if [ $homog = false ]
+then
+	if [ ! -r $outer_skull ]
+	then
+		echo "Could not find the outer skull triangulation $outer_skull"
+		exit 1
+	fi
+	if [ ! -r $outer_skin ]
+	then
+		echo "Could not find the scalp triangulation $outer_skin"
+		exit 1
+	fi
+fi
+#
+#	Report
+#
+if [ "$ico" ]
+then
+    ico="--ico $ico"
+fi
+echo 
+echo "Setting up the BEM with the following parameters:"
+echo
+echo "SUBJECTS_DIR       = $SUBJECTS_DIR"
+echo "Subject            = $SUBJECT"
+if [ $surf = true ]
+then
+    ntri_inner_skull=$(mne_surf2bem --ntri --surf $inner_skull $ico)
+else
+    ntri_inner_skull=$((`head -1 $inner_skull | awk '{ print $1 }'` * 2 -4))
+fi
+echo "Inner skull        = $inner_skull ($ntri_inner_skull triangles)"
+if [ $homog = "false" ]
+then
+    if [ $surf = true ]
+    then
+	ntri_outer_skull=$(mne_surf2bem --ntri --surf $outer_skull $ico)
+        ntri_outer_skin=$(mne_surf2bem --ntri  --surf $outer_skin $ico)
+    else
+	ntri_outer_skull=$((`head -1 $outer_skull | awk '{ print $1 }'` * 2 -4))
+	ntri_outer_skin=$((`head -1 $outer_skin | awk '{ print $1 }'` * 2 -4))
+    fi
+    echo "Outer skull        = $outer_skull ($ntri_outer_skull triangles)"
+    echo "Scalp              = $outer_skin ($ntri_outer_skin triangles)"
+fi
+echo "brain conductivity = $brainc S/m"
+if [ $homog = "false" ]
+then
+	echo "skull conductivity = $skullc S/m"
+	echo "scalp conductivity = $scalpc S/m"
+fi
+#
+#	Figure out the model name
+#
+model_dir=$bem_dir
+if [ ! "$model" ]
+then
+	
+	if [ "$homog" = false ]
+	then
+	    model=$model_dir/$SUBJECT-$ntri_inner_skull-$ntri_outer_skull-$ntri_outer_skin-bem.fif
+	else
+	    model=$model_dir/$SUBJECT-$ntri_inner_skull-bem.fif
+	fi
+else
+	model=$model_dir/$model-bem.fif
+fi
+echo "Resulting BEM      = $model"
+echo
+#
+# Ready to go 
+#
+echo ">> 1. Creating the BEM geometry file..."
+if [ "$homog" = false ]
+then
+    if [ $surf = true ]
+    then 
+	mne_surf2bem \
+	    --surf  $inner_skull \
+	    --sigma $brainc \
+	    --id    1 \
+	    --shift $inner_shift \
+	    $ico \
+	    --surf  $outer_skull \
+	    --sigma $skullc \
+	    --id    3 \
+	    --shift $outer_shift \
+	    $ico \
+	    --surf  $outer_skin \
+	    --sigma $scalpc \
+	    --id    4 \
+	    --shift $scalp_shift \
+	    $ico \
+	    --checkmore \
+	    --fif $model 
+    else
+	mne_surf2bem \
+	    --tri  $inner_skull \
+	    --sigma $brainc \
+	    --id    1 \
+	    --shift $inner_shift \
+	    $swap \
+	    $meters \
+	    $ico \
+	    --tri  $outer_skull \
+	    --sigma $skullc \
+	    --id    3 \
+	    --shift $outer_shift \
+	    $swap \
+	    $meters \
+	    $ico \
+	    --tri  $outer_skin \
+	    --sigma $scalpc \
+	    --id    4 \
+	    --shift $scalp_shift \
+	    $swap \
+	    $meters \
+	    $ico \
+	    --checkmore \
+	    --fif $model 
+    fi
+else
+    if [ $surf = true ]
+    then
+	mne_surf2bem \
+	    --surf  $inner_skull \
+	    --sigma $brainc \
+	    --id    1 \
+	    --shift $inner_shift \
+	    $ico \
+	    --check \
+	    --fif $model 
+    else
+	mne_surf2bem \
+	    --tri   $inner_skull \
+	    --sigma $brainc \
+	    --id    1 \
+	    --shift $inner_shift \
+	    $swap \
+	    $meters \
+	    $ico \
+	    --check \
+	    --fif $model 
+    fi	
+fi
+if [ $? -ne 0 ]
+then
+    echo "Could't create the geometry file"
+    exit 1
+fi
+echo
+echo ">> 2. Creating ascii pnt files for MRIlab..."
+
+if [ $homog = false ]
+then
+    mne_list_bem --id 4 --bem $model --out $bem_dir/${SUBJECT}-outer_skin-$ntri_outer_skin.pnt
+    mne_list_bem --id 3 --bem $model --out $bem_dir/${SUBJECT}-outer_skull-$ntri_outer_skull.pnt
+    mne_list_bem --id 1 --bem $model --out $bem_dir/${SUBJECT}-inner_skull-$ntri_inner_skull.pnt
+    mne_list_bem --id 4 --bem $model --surf --out $bem_dir/${SUBJECT}-outer_skin-$ntri_outer_skin.surf
+    mne_list_bem --id 3 --bem $model --surf --out $bem_dir/${SUBJECT}-outer_skull-$ntri_outer_skull.surf
+    mne_list_bem --id 1 --bem $model --surf --out $bem_dir/${SUBJECT}-inner_skull-$ntri_inner_skull.surf
+    echo
+else
+    mne_list_bem --id 1 --bem $model --out $bem_dir/${SUBJECT}-inner_skull-$ntri_inner_skull.pnt
+    mne_list_bem --id 1 --bem $model --surf --out $bem_dir/${SUBJECT}-inner_skull-$ntri_inner_skull.surf
+fi    
+if [ $prepare = true ]
+then
+    echo
+    echo ">> 3. Calculating BEM geometry data (this takes several minutes)..."
+    echo
+    model_sol=$(echo $model | sed 's/.fif/-sol.fif/')
+    rm -f $model_sol
+    mne_prepare_bem_model --bem $model --sol $model_sol --method linear
+    if [ $? -ne 0 ]
+    then
+	echo "Model preparation failed."
+        exit 1
+    else
+	echo 
+	echo "The model $model_sol is now ready for use"
+    fi
+fi
+echo "Complete."
+exit 0

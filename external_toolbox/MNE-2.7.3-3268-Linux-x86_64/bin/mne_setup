@@ -1,0 +1,150 @@
+#!/bin/tcsh -ef
+#
+#   Setup script for MNE software
+#
+#
+#   Copyright 2009
+#
+#   Nick Schmansky
+#   Athinoula A. Martinos Center for Biomedical Imaging
+#   Massachusetts General Hospital
+#   Charlestown, MA, USA
+#
+#   $Id: mne_setup_mne 2902 2009-10-31 23:00:23Z nicks $
+#
+
+set OS=`uname -s`
+set PROC=`uname -p`
+
+#
+# check for MNE_ROOT and exit if not found
+#
+if ( ! $?MNE_ROOT ) then
+    echo "ERROR: The environment variable MNE_ROOT is not defined!"
+    echo "       Set MNE_ROOT to the directory where MNE is installed."
+    exit 1;
+endif
+if ( ! -e $MNE_ROOT ) then
+    echo "ERROR: $MNE_ROOT "
+    echo "       does not exist. Check that this value is correct.";
+    exit 1;
+endif
+#
+# MATLAB_ROOT is not mandatory
+#
+if ( $?MATLAB_ROOT ) then
+    if ( ! -e $MATLAB_ROOT ) then
+	echo "ERROR: $MATLAB_ROOT "
+	echo "       does not exist. Check that this value is correct.";
+	exit 1;
+    endif
+endif
+
+echo ""
+echo "MNE software location set to:    $MNE_ROOT"
+if ( $?MATLAB_ROOT ) then
+    echo "MATLAB software location set to: $MATLAB_ROOT"
+else
+    echo "MATLAB software not available"
+endif
+echo ""
+
+#
+# add MNE_ROOT/bin to path
+#
+setenv MNE_BIN_PATH $MNE_ROOT/bin
+echo $PATH | grep $MNE_BIN_PATH > /dev/null
+if ( $? == 0 ) then
+    echo "$MNE_BIN_PATH already in PATH"
+else
+    setenv PATH "$MNE_BIN_PATH":$PATH
+    echo "$MNE_BIN_PATH added to PATH"
+endif
+
+#
+# add MNE_ROOT/lib to (DY)LD_LIBRARY_PATH
+#
+setenv MNE_LIB_PATH $MNE_ROOT/lib
+if( "x$OS" == "xLinux" ) then
+    if(! $?LD_LIBRARY_PATH ) then
+        setenv LD_LIBRARY_PATH $MNE_LIB_PATH
+    else
+        setenv LD_LIBRARY_PATH "$MNE_LIB_PATH":"$LD_LIBRARY_PATH"
+    endif
+    echo "${MNE_LIB_PATH} added to LD_LIBRARY_PATH"
+else if( "x$OS" == "xDarwin" ) then
+    if(! $?DYLD_LIBRARY_PATH ) then
+        setenv DYLD_LIBRARY_PATH $MNE_LIB_PATH
+    else
+        setenv DYLD_LIBRARY_PATH "$MNE_LIB_PATH":"$DYLD_LIBRARY_PATH"
+    endif
+    echo "${MNE_LIB_PATH} added to DYLD_LIBRARY_PATH"
+endif
+
+#
+# add XUSERFILESEARCHPATH so that mne_analyze and mne_browse_raw
+# can find their defaults files (MneAnalyze and MneBrowse)
+#
+set APPDEF="${MNE_ROOT}/share/app-defaults/%N"
+if ( ! $?XUSERFILESEARCHPATH ) then
+    setenv XUSERFILESEARCHPATH "${APPDEF}"
+else
+    setenv XUSERFILESEARCHPATH "${XUSERFILESEARCHPATH}":"${APPDEF}"
+endif
+echo "${APPDEF} added to XUSERFILESEARCHPATH"
+
+#
+# note: setup of matlab lib dir to (DY)LD_LIBRARY_PATH is performed
+# independently by wrapper scripts where needed to avoid polluting the
+# environment with (DY)LD_LIBRARY_PATH paths (eg. libtiff problems)
+#
+
+#
+# add matlab files to matlab search path
+#
+if ( $?MATLAB_ROOT ) then
+    set SUF = ~/matlab/startup.m
+    if( ! -e $SUF ) then
+	echo "INFO: $SUF does not exist ... creating"
+	mkdir -p ~/matlab
+	touch $SUF
+	
+	echo "%---------------------- MNE --------------------------%" >> $SUF
+	echo "mnehome = getenv('MNE_ROOT');"                           >> $SUF
+	echo "mnematlab = sprintf('%s/share/matlab',mnehome);"         >> $SUF
+	echo "if (exist(mnematlab) == 7)"                              >> $SUF
+	echo "    path(path,mnematlab);"                               >> $SUF
+	echo "end"                                                     >> $SUF
+	echo "clear mnehome mnematlab;"                                >> $SUF
+	echo "%-----------------------------------------------------%" >> $SUF
+	echo "" >> $SUF
+    endif
+
+    set tmp1 = `grep MNE_ROOT $SUF       | wc -l`;
+    if( $tmp1 == 0 ) then
+	echo ""
+	echo "WARNING: The $SUF file does not appear to be";
+	echo "         configured correctly. You may not be able"
+	echo "         to access the MNE Matlab toolbox.";
+	echo "Try adding the following lines to $SUF"
+	echo "%---------------------- MNE --------------------------%"
+	echo "mnehome = getenv('MNE_ROOT');"
+	echo "mnematlab = sprintf('%s/share/matlab',mnehome);"
+	echo "if (exist(mnematlab) == 7)"
+	echo "    path(path,mnematlab);"
+	echo "end"
+	echo "clear mnehome mnematlab;"
+	echo "%-----------------------------------------------------%"
+	echo ""
+    endif
+endif
+#
+# Just a friendly reminder
+#
+echo ""
+echo "Note: Remember to set SUBJECTS_DIR and SUBJECT environment variables correctly."
+echo "Note: FreeSurfer environment is needed to access tkmedit from mne_analyze."
+echo ""
+
+# cause OS to build new bin path cache:
+rehash;

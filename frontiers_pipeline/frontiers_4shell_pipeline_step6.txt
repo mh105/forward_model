@@ -1,0 +1,140 @@
+#!/bin/bash
+
+set -e 
+
+# This is an automated pipeline to build 4-shell forward models in the Purdonlab.
+# Reference:
+# He, M., Liu, F., Nummenmaa, A., Hämäläinen, M., Dickerson, B. C., & Purdon, P. L. (2021). Age-Related EEG Power Reductions Cannot Be Explained by Changes of the Conductivity Distribution in the Head Due to Brain Atrophy. Frontiers in aging neuroscience, 26.
+
+# Last edit: Alex He 10/06/2022
+
+
+
+# Note the start time
+start=$(date +%s)
+
+# Store the current directory to get back after the pipeline 
+CURRDIR=$PWD
+
+
+
+##################################
+# STEP 6: Final clean up for hbf to MNE conversion
+##################################
+
+# Get user input of subject directory as a full path
+if [ -z "$SUBDIR" ]
+then
+    echo ""
+    ls /autofs/cifs/adsleepeeg/archive/subject_data
+    echo ""
+    read -p "SUBDIR=" SUBDIR
+fi
+
+if [[ ! "$SUBDIR" == *"/"* ]]
+then
+    echo "Shorthand SUBDIR detected. Automatically appending /autofs/cifs/adsleepeeg/archive/subject_data/*/mri."
+    SUBDIR=/autofs/cifs/adsleepeeg/archive/subject_data/$SUBDIR/mri
+fi
+
+# Set up derivative directories 
+MAINDIR=$SUBDIR/simnibs_pipe
+BEMDIR=$MAINDIR/bem_surfaces
+CODEDIR=$CURRDIR/../src
+FIFDIR=$SUBDIR/../fif
+
+# Using space-holder subject ID for SimNIBS pipelines
+SUBID=FS6
+
+
+
+##################################
+#
+# create .surf files for new surfaces created during step5
+#
+##################################
+
+cd $BEMDIR/final_structure
+python $CODEDIR/hbf2MNE_mat2surf.py
+mv *.surf $BEMDIR/final_surface
+
+
+
+#################################
+#
+# MNE forward model on bmeshes
+#
+#################################
+
+# Convert BEM surfaces to .surf
+python $CODEDIR/hbf2MNE_bem2surf.py
+if [ ! -d "$BEMDIR/final_surface/m2m_recon/bem" ]
+then
+    mkdir $BEMDIR/final_surface/m2m_recon/bem
+fi
+mv *.surf $BEMDIR/final_surface/m2m_recon/bem
+
+# Use MNE to construct forward models and save as fif files
+python $CODEDIR/hbf2MNE_fwdmodel.py 345
+
+
+
+#################################
+#
+# create -fwd.fif files with hbf LFM
+#
+#################################
+
+# Update both fwd['sol']['data'] and fwd['_orig_sol']
+python $CODEDIR/hbf2MNE_updatelfm.py 345
+mv four_layer-ico*-fwd.fif $FIFDIR
+
+
+
+#################################
+#
+# get the Desikan atlas aparc
+#
+#################################
+
+if [ ! -d "$BEMDIR/final_surface/m2m_recon/label" ]
+then
+    mkdir $BEMDIR/final_surface/m2m_recon/label
+fi
+
+cp $MAINDIR/mri2mesh/fs_$SUBID/label/*aparc.annot $BEMDIR/final_surface/m2m_recon/label
+cp $CODEDIR/atlas_templates.csv $BEMDIR/final_structure/atlas_templates.csv
+
+# Save the atlas info
+python $CODEDIR/hbf2MNE_getatlas.py 345
+
+
+
+##################################
+# End of STEP 6
+##################################
+unset SUBDIR
+echo ""
+echo "frontiers_4shell_pipeline_step6.txt completed without error."
+echo ""
+
+
+
+# Go back to the original directory
+cd $CURRDIR 
+
+# Report time taken to run this script 
+
+secs_to_human() {
+    if [[ -z ${1} || ${1} -lt 60 ]] ;then
+        min=0 ; secs="${1}"
+    else
+        time_mins=$(echo "scale=2; ${1}/60" | bc)
+        min=$(echo ${time_mins} | cut -d'.' -f1)
+        secs="0.$(echo ${time_mins} | cut -d'.' -f2)"
+        secs=$(echo ${secs}*60|bc|awk '{print int($1+0.5)}')
+    fi
+    echo "Time taken for STEP 6 : ${min} minutes and ${secs} seconds."
+}
+
+secs_to_human "$(($(date +%s) - ${start}))"

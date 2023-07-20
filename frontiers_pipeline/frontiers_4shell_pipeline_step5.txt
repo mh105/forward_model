@@ -1,0 +1,74 @@
+#!/bin/bash
+
+set -e 
+
+# This is an automated pipeline to build 4-shell forward models in the Purdonlab.
+# Reference:
+# He, M., Liu, F., Nummenmaa, A., Hämäläinen, M., Dickerson, B. C., & Purdon, P. L. (2021). Age-Related EEG Power Reductions Cannot Be Explained by Changes of the Conductivity Distribution in the Head Due to Brain Atrophy. Frontiers in aging neuroscience, 26.
+
+# Last edit: Alex He 10/06/2022
+
+
+
+# Note the start time
+start=$(date +%s)
+
+# Store the current directory to get back after the pipeline 
+CURRDIR=$PWD
+
+
+
+##################################
+# STEP 5: Build 4-shell forward model
+##################################
+
+# Get user input of subject directory as a full path
+if [ -z "$SUBDIR" ]
+then
+    echo ""
+    ls /autofs/cifs/adsleepeeg/archive/subject_data
+    echo ""
+    read -p "SUBDIR=" SUBDIR
+fi
+
+if [[ ! "$SUBDIR" == *"/"* ]]
+then
+    echo "Shorthand SUBDIR detected. Automatically appending /autofs/cifs/adsleepeeg/archive/subject_data/*/mri."
+    SUBDIR=/autofs/cifs/adsleepeeg/archive/subject_data/$SUBDIR/mri
+fi
+
+# Set up derivative directories
+DATAPATH=$SUBDIR/simnibs_pipe/bem_surfaces/final_structure
+CODEPATH=$CURRDIR/../
+
+# Compute the BEM solutions with Helsinki solver in MATLAB
+matlab -nodesktop -r "frontiers_4shell_pipeline_step5('$DATAPATH', '$CODEPATH', '345'); exit;"
+
+##################################
+# End of STEP 5
+##################################
+unset SUBDIR
+echo ""
+echo "frontiers_4shell_pipeline_step5.txt completed without error."
+echo ""
+
+
+
+# Go back to the original directory
+cd $CURRDIR 
+
+# Report time taken to run this script 
+
+secs_to_human() {
+    if [[ -z ${1} || ${1} -lt 60 ]] ;then
+        min=0 ; secs="${1}"
+    else
+        time_mins=$(echo "scale=2; ${1}/60" | bc)
+        min=$(echo ${time_mins} | cut -d'.' -f1)
+        secs="0.$(echo ${time_mins} | cut -d'.' -f2)"
+        secs=$(echo ${secs}*60|bc|awk '{print int($1+0.5)}')
+    fi
+    echo "Time taken for STEP 5 : ${min} minutes and ${secs} seconds."
+}
+
+secs_to_human "$(($(date +%s) - ${start}))"

@@ -1,0 +1,418 @@
+#!/bin/bash
+
+set -e 
+
+# This is an automated pipeline to build 4-shell forward models in the Purdonlab.
+# Reference:
+# He, M., Liu, F., Nummenmaa, A., Hämäläinen, M., Dickerson, B. C., & Purdon, P. L. (2021). Age-Related EEG Power Reductions Cannot Be Explained by Changes of the Conductivity Distribution in the Head Due to Brain Atrophy. Frontiers in aging neuroscience, 26.
+
+# Last edit: Alex He 10/06/2022
+
+
+
+# Note the start time
+start=$(date +%s)
+
+# Store the current directory to get back after the pipeline 
+CURRDIR=$PWD
+
+
+
+##################################
+# STEP 4: Run 4-shell model meshing
+##################################
+
+# Get user input of subject directory as a full path
+if [ -z "$SUBDIR" ]
+then
+    echo ""
+    ls /autofs/cifs/adsleepeeg/archive/subject_data
+    echo ""
+    read -p "SUBDIR=" SUBDIR
+fi
+
+if [[ ! "$SUBDIR" == *"/"* ]]
+then
+    echo "Shorthand SUBDIR detected. Automatically appending /autofs/cifs/adsleepeeg/archive/subject_data/*/mri."
+    SUBDIR=/autofs/cifs/adsleepeeg/archive/subject_data/$SUBDIR/mri
+fi
+
+# Set up derivative directories 
+MAINDIR=$SUBDIR/simnibs_pipe
+HEADRECODIR=$MAINDIR/headreco
+M2MDIR=$MAINDIR/mri2mesh
+RECONDIR=$SUBDIR/recons/FS6
+CODEDIR=$CURRDIR/../src
+FIFDIR=$SUBDIR/../fif
+
+# Specify the -raw.fif and -trans.fif filenames
+echo ""
+ls $FIFDIR
+echo ""
+read -p "-raw.fif filename (hit ENTER for default) =" RAWFN
+if [ -z "$RAWFN" ]
+then
+    count=0
+    for f in $FIFDIR/*-raw.fif; do
+        RAWFN=$f
+	count=$((count+1))
+    done
+    if [ ! count==1 ]; then
+        echo "Using default -raw.fif filename failed. Are there more than one or none valid -raw.fif files? Please provide one filename explicitly."
+        CURRDIR=$PWD
+        return 0001 # die with error code 0001
+    fi
+fi
+
+read -p "-trans.fif filename (hit ENTER for default) =" TRANSFN
+if [ -z "$TRANSFN" ]
+then
+    count=0
+    for f in $FIFDIR/*-trans.fif; do
+        TRANSFN=$f
+	count=$((count+1))
+    done
+    if [ ! count==1 ]; then
+        echo "Using default -trans.fif filename failed. Are there more than one or none valid -trans.fif files? Please provide one filename explicitly."
+        CURRDIR=$PWD
+        return 0001 # die with error code 0001
+    fi
+fi
+
+
+
+#################################
+#
+# make sure directories are valid
+#
+#################################
+
+### Check if a directory does not exist ###
+if [ ! -d "$FSLDIR" ] 
+then
+    echo "FSLDIR Directory $FSLDIR DOES NOT exist."
+    CURRDIR=$PWD
+    return 0001 # die with error code 0001
+fi
+
+### Check if a directory does not exist ###
+if [ ! -d "$MAINDIR" ] 
+then
+    echo "MAINDIR Directory $MAINDIR DOES NOT exist."
+    CURRDIR=$PWD
+    return 0001 # die with error code 0001
+fi
+
+### Check if a directory does not exist ###
+if [ ! -d "$HEADRECODIR" ] 
+then
+    echo "HEADRECODIR Directory $HEADRECODIR DOES NOT exist."
+    CURRDIR=$PWD
+    return 0001 # die with error code 0001
+fi
+
+### Check if a directory does not exist ###
+if [ ! -d "$M2MDIR" ] 
+then
+    echo "M2MDIR Directory $M2MDIR DOES NOT exist."
+    CURRDIR=$PWD
+    return 0001 # die with error code 0001
+fi
+
+### Check if a directory does not exist ###
+if [ ! -d "$RECONDIR" ] 
+then
+    echo "RECONDIR Directory $RECONDIR DOES NOT exist."
+    CURRDIR=$PWD
+    return 0001 # die with error code 0001
+fi
+
+### Check if a directory does not exist ###
+if [ ! -d "$CODEDIR" ] 
+then
+    echo "CODEDIR Directory $CODEDIR DOES NOT exist."
+    CURRDIR=$PWD
+    return 0001 # die with error code 0001
+fi
+
+### Check if a directory does not exist ###
+if [ ! -d "$FIFDIR" ] 
+then
+    echo "FIFDIR Directory $FIFDIR DOES NOT exist."
+    CURRDIR=$PWD
+    return 0001 # die with error code 0001
+fi
+
+### Check if a file does not exist ###
+if [ ! -f "$RAWFN" ]
+then
+    echo "-raw.fif File $RAWFN DOES NOT exist."
+    CURRDIR=$PWD
+    return 0001 # die with error code 0001
+fi
+
+### Check if a file does not exist ###
+if [ ! -f "$TRANSFN" ]
+then
+    echo "-trans.fif File $TRANSFN DOES NOT exist."
+    CURRDIR=$PWD
+    return 0001 # die with error code 0001
+fi
+
+
+
+#################################
+#
+# make bem_surfaces folder
+#
+#################################
+
+BEMDIR=$MAINDIR/bem_surfaces
+
+if [ ! -d "$BEMDIR" ]
+then
+    mkdir $BEMDIR
+fi
+
+cd $BEMDIR
+
+# Instantiate the subfolders 
+if [ ! -d "$BEMDIR/raw_surface" ]
+then
+    mkdir $BEMDIR/raw_surface
+fi
+
+if [ ! -d "$BEMDIR/raw_volume" ]
+then
+    mkdir $BEMDIR/raw_volume
+fi
+
+if [ ! -d "$BEMDIR/final_surface" ]
+then
+    mkdir $BEMDIR/final_surface
+fi
+
+if [ ! -d "$BEMDIR/final_structure" ]
+then
+    mkdir $BEMDIR/final_structure
+fi
+
+
+
+#################################
+#
+# MNE surface processing
+#
+#################################
+
+# Move the T1.mgz file
+cp $RECONDIR/mri/T1.mgz $BEMDIR/raw_volume/T1.mgz
+
+# Move the relevant MNE surfaces to raw_surface folder
+cp $RECONDIR/bem/outer_skull.surf $BEMDIR/raw_surface/MNE_outer_skull.surf
+cp $RECONDIR/bem/outer_skin.surf $BEMDIR/raw_surface/MNE_outer_skin.surf
+
+# Update MNE_outer_skull.surf with volume geometry info from T1.mgz
+cd $BEMDIR/raw_surface
+mris_convert --vol-geom ../raw_volume/T1.mgz MNE_outer_skull.surf MNE_outer_skull.surf
+cp rh.MNE_outer_skull.surf $BEMDIR/final_surface/MNE_outer_skull.surf
+cp MNE_outer_skin.surf $BEMDIR/final_surface/MNE_outer_skin.surf
+rm -f rh*
+
+
+
+#################################
+#
+# headreco surface processing
+#
+#################################
+
+# Convert .stl files to .surf format
+mris_convert $HEADRECODIR/m2m*/skin.stl $BEMDIR/raw_surface/headreco_skin.surf
+mris_convert $HEADRECODIR/m2m*/bone.stl $BEMDIR/raw_surface/headreco_bone.surf
+mris_convert $HEADRECODIR/m2m*/csf.stl $BEMDIR/raw_surface/headreco_csf.surf
+
+# Update surfaces with volume geometry info from T1.mgz
+mris_convert --vol-geom ../raw_volume/T1.mgz headreco_skin.surf headreco_skin.surf
+mris_convert --to-tkr rh.headreco_skin.surf rh.headreco_skin.surf
+cp rh.headreco_skin.surf $BEMDIR/final_surface/headreco_skin.surf
+mris_convert --vol-geom ../raw_volume/T1.mgz headreco_bone.surf headreco_bone.surf
+mris_convert --to-tkr rh.headreco_bone.surf rh.headreco_bone.surf
+cp rh.headreco_bone.surf $BEMDIR/final_surface/headreco_bone.surf
+mris_convert --vol-geom ../raw_volume/T1.mgz headreco_csf.surf headreco_csf.surf
+mris_convert --to-tkr rh.headreco_csf.surf rh.headreco_csf.surf
+cp rh.headreco_csf.surf $BEMDIR/final_surface/headreco_csf.surf
+rm -f rh*
+
+
+
+#################################
+#
+# mri2mesh surface processing
+#
+#################################
+
+# Convert .stl files to .surf format
+mris_convert $M2MDIR/m2m*/wm.stl $BEMDIR/raw_surface/mri2mesh_wm.surf
+mris_convert $M2MDIR/m2m*/gm.stl $BEMDIR/raw_surface/mri2mesh_gm.surf
+mris_convert $M2MDIR/m2m*/csf.stl $BEMDIR/raw_surface/mri2mesh_csf.surf
+mris_convert $M2MDIR/m2m*/cerebellum.stl $BEMDIR/raw_surface/mri2mesh_cerebellum.surf
+mris_convert $M2MDIR/m2m*/skull.stl $BEMDIR/raw_surface/mri2mesh_skull.surf
+
+# Move the mri2mesh recon T1 resampled volume to the raw_volume folder
+cp $M2MDIR/m2m*/T1fs_resamp.nii.gz $BEMDIR/raw_volume/tmp_T1fs_resamp.nii.gz
+
+# Move the mri2mesh recon white matter surfaces to the raw_surface folder
+cp $M2MDIR/fs*/surf/lh.white $BEMDIR/raw_surface/mri2mesh_fs_lh_wm.surf
+cp $M2MDIR/fs*/surf/rh.white $BEMDIR/raw_surface/mri2mesh_fs_rh_wm.surf
+
+# Prepare coordinates for calculating translation matrix
+cd $BEMDIR/raw_volume
+mri_convert T1.mgz tmp_T1.nii.gz
+fslswapdim tmp_T1fs_resamp.nii.gz x -z y tmp_T1fs_swap.nii.gz
+flirt -in tmp_T1fs_swap.nii -ref tmp_T1.nii.gz -out tmp_T1fs_swap_flirt.nii -omat tmp_xform.mat -schedule $FSLDIR/etc/flirtsch/xyztrans.sch
+printf "0-0-0" > tmp_origin.txt
+mri_info T1.mgz --cras >> tmp_textout.txt
+cat tmp_origin.txt | img2imgcoord -src tmp_T1fs_swap.nii -dest tmp_T1fs_swap_flirt.nii -xfm tmp_xform.mat -mm >> tmp_textout.txt
+sed '2d' tmp_textout.txt > tmp_offset.txt
+cp $BEMDIR/raw_volume/tmp_offset.txt $BEMDIR/raw_surface/tmp_offset.txt
+rm -f tmp*
+
+# Run the python script for fixing the mri2mesh surfaces using the coordinates in temp_offset
+cd $BEMDIR/raw_surface
+python $CODEDIR/fix_mri2mesh_surface.py
+rm -f tmp_offset.txt
+
+# Update these fixed surfaces with volume geometry info from T1.mgz
+mris_convert --vol-geom ../raw_volume/T1.mgz mri2mesh_wm_fixed.surf mri2mesh_wm_fixed.surf
+mris_convert --vol-geom ../raw_volume/T1.mgz mri2mesh_gm_fixed.surf mri2mesh_gm_fixed.surf
+mris_convert --vol-geom ../raw_volume/T1.mgz mri2mesh_csf_fixed.surf mri2mesh_csf_fixed.surf
+mris_convert --vol-geom ../raw_volume/T1.mgz mri2mesh_cerebellum_fixed.surf mri2mesh_cerebellum_fixed.surf
+mris_convert --vol-geom ../raw_volume/T1.mgz mri2mesh_skull_fixed.surf mri2mesh_skull_fixed.surf
+
+# Update the gm/wm boundary surfaces as well
+mris_convert --vol-geom ../raw_volume/T1.mgz mri2mesh_fs_lh_wm_fixed.surf mri2mesh_fs_lh_wm_fixed.surf
+mris_convert --vol-geom ../raw_volume/T1.mgz mri2mesh_fs_rh_wm_fixed.surf mri2mesh_fs_rh_wm_fixed.surf
+
+# Move the finished surfaces to final_surface folder
+mv rh.mri2mesh_wm_fixed.surf $BEMDIR/final_surface/mri2mesh_wm_fixed.surf
+mv rh.mri2mesh_gm_fixed.surf $BEMDIR/final_surface/mri2mesh_gm_fixed.surf
+mv rh.mri2mesh_csf_fixed.surf $BEMDIR/final_surface/mri2mesh_csf_fixed.surf
+mv rh.mri2mesh_cerebellum_fixed.surf $BEMDIR/final_surface/mri2mesh_cerebellum_fixed.surf
+mv rh.mri2mesh_skull_fixed.surf $BEMDIR/final_surface/mri2mesh_skull_fixed.surf
+
+# Move the gm/wm boundary surfaces as well
+mv rh.mri2mesh_fs_lh_wm_fixed.surf $BEMDIR/final_surface/mri2mesh_fs_lh_wm_fixed.surf
+mv rh.mri2mesh_fs_rh_wm_fixed.surf $BEMDIR/final_surface/mri2mesh_fs_rh_wm_fixed.surf
+
+
+
+#################################
+#
+# set up source space
+#
+#################################
+
+cd $BEMDIR/final_surface
+
+# Set up a barebone recon folder for the mri2mesh white matter surface used for 4-shell models
+if [ ! -d "m2m_recon" ]
+then
+    mkdir m2m_recon
+fi
+
+if [ ! -d "m2m_recon/surf" ]
+then
+    mkdir m2m_recon/surf
+fi
+
+cp mri2mesh_fs_lh_wm_fixed.surf m2m_recon/surf/lh.white
+cp $M2MDIR/fs*/surf/lh.sphere m2m_recon/surf/lh.sphere
+cp mri2mesh_fs_rh_wm_fixed.surf m2m_recon/surf/rh.white
+cp $M2MDIR/fs*/surf/rh.sphere m2m_recon/surf/rh.sphere
+
+python $CODEDIR/set_up_source.py 345
+
+# Move to the final_structure folder
+mv ico* ../final_structure
+
+
+
+#################################
+#
+# final surfaces clean up
+#
+#################################
+
+# Save all .surf files to .mat
+cd $BEMDIR/final_surface
+
+python $CODEDIR/surf2mat.py
+
+# Move to the final_structure folder
+mv *.mat ../final_structure
+
+
+
+#################################
+#
+# obtain electrode information
+#
+#################################
+
+# Grab the raw and trans files
+cd $BEMDIR/final_structure
+cp $RAWFN $BEMDIR/final_structure/raw.fif
+cp $TRANSFN $BEMDIR/final_structure/trans.fif
+python $CODEDIR/trans2mat.py
+
+
+
+#################################
+#
+# final manual quality check
+#
+#################################
+
+# Use Freeview to visualize all surfaces
+cd $BEMDIR
+freeview -v raw_volume/T1.mgz -f final_surface/*.surf
+
+read -p "Any issues with the final surfaces? (y/n):" EXIT_FLAG
+if [ "y" == "$EXIT_FLAG" ]
+then
+    echo "Errors reported in checking meshed surfaces. Please debug."
+    CURRDIR=$PWD
+    return 0001 # die with error code 0001
+fi
+
+
+
+##################################
+# End of STEP 4
+##################################
+unset SUBDIR
+echo ""
+echo "frontiers_4shell_pipeline_step4.txt completed without error."
+echo ""
+
+
+
+# Go back to the original directory
+cd $CURRDIR 
+
+# Report time taken to run this script 
+
+secs_to_human() {
+    if [[ -z ${1} || ${1} -lt 60 ]] ;then
+        min=0 ; secs="${1}"
+    else
+        time_mins=$(echo "scale=2; ${1}/60" | bc)
+        min=$(echo ${time_mins} | cut -d'.' -f1)
+        secs="0.$(echo ${time_mins} | cut -d'.' -f2)"
+        secs=$(echo ${secs}*60|bc|awk '{print int($1+0.5)}')
+    fi
+    echo "Time taken for STEP 4 : ${min} minutes and ${secs} seconds."
+}
+
+secs_to_human "$(($(date +%s) - ${start}))"

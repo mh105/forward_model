@@ -1,0 +1,53 @@
+#!/bin/bash
+
+#Setup paths 
+CODEDIR=/Users/alexhe/Dropbox/Mac_Desktop/MIT_HST/NSRL_Purdon_Prerau/EEG/code/forward_model
+CURRDIR=$PWD
+
+MAINDIR=/Users/alexhe/Dropbox/Mac_Desktop/MIT_HST/NSRL_Purdon_Prerau/forward_modeling/4layer_BEM/sample_mesh/pipelines
+BEMDIR=$MAINDIR/bem_surfaces
+EEGDIR=/Users/alexhe/Dropbox_Personal/Mac_Desktop/MIT_HST/NSRL_Purdon_Prerau/EEG/data/TDelp
+RAWFIFN=TDelp_resting_raw.fif
+
+#################################
+#
+# electrode co-registration
+#
+#################################
+# we need to align the electrode to the MRI coordinate as in the T1.mgz volume. We do so using mne coreg function.
+
+#Create fake recon folder
+cd $BEMDIR/final_structure
+mkdir temp_recon
+mkdir temp_recon/bem
+
+#Move the outer_skin surface over to the fake recon folder
+cp $BEMDIR/final_surface/headreco_skin.surf temp_recon/bem/outer_skin.surf
+
+#Move the _raw.fif to final_structure
+cp $EEGDIR/set/$RAWFIFN $BEMDIR/final_structure/raw.fif
+
+#Use MNE COREG to align the electrodes and generate trans file
+mne coreg -d $BEMDIR/final_structure -s temp_recon -f $EEGDIR/set/$RAWFIFN --mark-inside --interaction="terrain"
+
+#Rename the -trans.fif with file ID
+SUFFIX='_raw.fif'
+FILEID=${RAWFIFN%"$SUFFIX"}
+mv $EEGDIR/set/temp_recon-trans.fif $EEGDIR/set/$FILEID'-trans.fif'
+
+#Copy to final_structure folder
+cp $EEGDIR/set/$FILEID'-trans.fif' $BEMDIR/final_structure/trans.fif
+
+#Convert to mat file
+python $CODEDIR/trans2mat.py
+
+#Save with fileID
+mv $BEMDIR/final_structure/temp-elc-trans.mat $BEMDIR/final_structure/$FILEID'-elc-trans.mat'
+
+#Remove temporary folders
+rm -r temp_recon 
+
+echo "-elc-trans.mat successfully generated and saved."
+
+#Go back to the original directory
+cd $CURRDIR 

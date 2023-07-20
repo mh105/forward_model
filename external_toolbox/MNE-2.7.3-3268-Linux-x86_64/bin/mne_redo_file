@@ -1,0 +1,80 @@
+#!/bin/sh
+#
+#       Redo a processing step
+#
+#       Copyright 2006
+#
+#       Matti Hamalainen
+#       Athinoula A. Martinos Center for Biomedical Imaging
+#       Massachusetts General Hospital
+#       Charlestown, MA, USA
+#
+#       $Id: mne_redo_file 2970 2009-11-09 12:13:49Z msh $
+#
+#
+if [ ! "$MNE_ROOT" ]
+then
+    echo "MNE_ROOT environment variable is not set"
+    exit 1
+fi
+if [ $# -eq 0 ]
+then
+	echo "usage: $0 file-to-redo"
+	exit 1
+fi
+if [ ! -f $1 ]
+then
+	echo "$1 not found"
+	exit 1
+fi
+if [ ! -r $1 ]
+then
+	echo "$1 not readable"
+	exit 1
+fi
+cwd=$(mne_show_fiff --verbose --tag  3550 --in $1 --long | cut -c 27-)
+command=$(mne_show_fiff --verbose --tag  3551 --in $1 --long | cut -c 27-)
+if [ ! "$cwd" ]
+then
+	echo "Working directory not specified in MNE env of $1"
+	exit 1
+fi
+if [ ! "$command" ]
+then
+	echo "Production command not specified in MNE env of $1"
+	exit 1
+fi
+shift
+#
+# Working directory stuff is complicated because of the automounter
+#    
+cwdorig=$cwd
+cd $cwd 2>/dev/null
+if [ $? -ne 0 ]
+then 
+    cwd=$(echo $cwd | sed 's/^\/tmp_mnt//')
+    cd $cwd 2>/dev/null
+    if [ $? -ne 0 ]
+    then 
+	cwd=$(echo $cwd | sed 's/^\/autofs//' | sed 's/_0*/\//' )
+	echo $cwd
+	cd $cwd 2>/dev/null
+	if [ $? -ne 0 ]
+	then 
+	    echo "Could not change to working directory: $cwdorig"
+	    exit 1
+	fi
+    fi
+fi
+echo "Changed to directory $cwd"
+echo "executing command : "
+echo "	$(echo $command $* | sed 's/--/\\\
+	--/g')"
+$command $*
+exit $?
+
+
+
+
+
+

@@ -1,0 +1,112 @@
+#!/bin/sh
+#
+#	List current versions of the MNE software modules
+#
+#       Copyright 2006
+#
+#       Matti Hamalainen
+#       Athinoula A. Martinos Center for Biomedical Imaging
+#       Massachusetts General Hospital
+#       Charlestown, MA, USA
+#
+#
+#	$Id: mne_list_versions 3031 2009-11-21 12:06:26Z msh $
+#
+#	Revision 1.7  2009/03/17 15:31:40  msh
+#	Update mne_list_versions to include the current set of programs
+#
+#	Revision 1.6  2008/06/16 20:40:07  msh
+#	Updated list of applications.
+#	
+#	Revision 1.5  2006/10/04 12:50:59  msh
+#	Use the new program launching utilities
+#	
+#
+if [ ! "$MNE_ROOT" ]
+then
+	echo "MNE_ROOT has not been set"
+	exit 1
+fi
+ADMIN_TOOLS="mne_list_coil_def \
+            mne_opengl_test"
+TOOLS="mne_add_patch_info \
+	mne_add_to_meas_info \
+	mne_add_triggers \
+	mne_analyze \
+	mne_anonymize \
+	mne_annot2labels \
+	mne_average_estimates \
+	mne_average_forward_solutions \
+	mne_brain_vision2fiff \
+	mne_browse_raw \
+	mne_change_baselines \
+	mne_change_nave \
+        mne_check_eeg_locations \
+        mne_check_surface \
+	mne_collect_transforms \
+	mne_compensate_data \
+	mne_compute_mne \
+	mne_compute_raw_inverse \
+	mne_convert_ctf_markers \
+	mne_convert_dig_data \
+	mne_convert_lspcov \
+	mne_convert_ncov \
+        mne_convert_surface \
+        mne_cov2proj \
+	mne_create_comp_data \
+	mne_ctf2fiff \
+	mne_ctf_dig2fiff \
+	mne_dicom_essentials \
+	mne_dipole_fit \
+	mne_edf2fiff \
+	mne_evoked_data_summary \
+        mne_fit_sphere_to_surf \
+	mne_fix_mag_coil_types \
+	mne_fix_stim14 \
+	mne_forward_solution \
+	mne_insert_4D_comp \
+	mne_inverse_operator \
+	mne_kit2fiff \
+	mne_list_bem \
+	mne_list_proj \
+	mne_list_source_space \
+	mne_make_cor_set \
+	mne_make_eeg_layout \
+	mne_make_derivations \
+	mne_make_movie \
+	mne_make_morph_maps \
+	mne_make_source_space \
+        mne_make_sphere_bem \
+	mne_make_uniform_stc \
+        mne_mark_bad_channels \
+	mne_morph_labels \
+	mne_prepare_bem_model \
+	mne_process_stc \
+	mne_rename_channels \
+        mne_sensitivity_map \
+	mne_sensor_locations \
+	mne_show_fiff \
+	mne_smooth \
+	mne_surf2bem \
+	mne_toggle_skips \
+	mne_transform_points \
+	mne_tufts2fiff \
+	mne_volume_data2mri \
+	mne_volume_source_space"
+MATLAB_TOOLS="mne_convert_mne_data \
+	mne_epochs2mat \
+	mne_raw2mat \
+        mne_simu"
+for i in $TOOLS
+do
+    $i --version 2>&1
+done
+for i in $ADMIN_TOOLS
+do
+    $i --version 2>&1
+done
+for i in $MATLAB_TOOLS
+do
+    $i --version 2>&1
+done
+exit 0

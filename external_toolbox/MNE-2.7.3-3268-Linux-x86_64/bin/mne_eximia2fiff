@@ -1,0 +1,229 @@
+#!/bin/sh
+#
+#	This script converts eXimia EEG data files to the fif format
+#
+#       Copyright 2008 - 2009
+#
+#       Matti Hamalainen
+#       Athinoula A. Martinos Center for Biomedical Imaging
+#       Massachusetts General Hospital
+#       Charlestown, MA, USA
+#
+#       $Id: mne_eximia2fiff 2902 2009-10-31 23:00:23Z nicks $
+#
+#       Revision 1.2  2008/06/04 18:03:49  msh
+#       Fixed problem with no options given to the script
+#
+#       Revision 1.1  2008/05/23 15:10:13  msh
+#       New utility to convert eXimia EEG files to fif format
+#
+#
+if [ $# -eq 0 ] ; then
+    echo "Usage : $0 [--orignames] [--dig <digitizer data>] <eXimia EEG data files>"
+    exit 1
+fi
+orignames=""
+digfile=""
+#
+#	Parse the options
+#
+while [ $# -gt 0 ]
+do
+	case "$1" in  
+	--dig) 
+		shift
+		if [ $# -eq 0 ]
+		then
+		    echo "--dig: argument required."
+		    exit 1
+		else
+		    digfile=$1
+		fi
+		;;
+	 --orignames)
+		orignames="--orignames"
+		;;
+	    *)
+		break;
+		;;
+	esac
+	shift
+done
+#
+#    Process the digitizer data file
+#
+digopt=""
+if [ "$digfile" ] ; then
+    echo
+    echo ">>> Converting digitization data file $digfile..."
+    grep Scalp $digfile | grep Left     | awk '{ printf "cardinal 001  %7.1f %7.1f %7.1f\n",$1,$2,$3 }' > $$.hpts
+    grep Scalp $digfile | grep Nasion   | awk '{ printf "cardinal 002  %7.1f %7.1f %7.1f\n",$1,$2,$3 }' >> $$.hpts
+    grep Scalp $digfile | grep Right    | awk '{ printf "cardinal 003  %7.1f %7.1f %7.1f\n",$1,$2,$3 }' >> $$.hpts
+    grep Point $digfile | grep Original | awk '{ printf "eeg      %03d %7.1f %7.1f %7.1f\n",$5,$1,$2,$3 }' >> $$.hpts
+    if [ $(wc -l $$.hpts | awk '{ print $1 }') -gt 0 ] ; then
+	mne_convert_dig_data --hpts $$.hpts --fifout ${$}-dig.fif --headcoord	
+	digopt="--dig ${$}-dig.fif"
+    fi
+    rm -f $$.hpts
+    echo
+fi
+#
+#    Process the remaining arguments as data files
+#
+for dataname in $* ; do
+#
+#   Find the data name
+#
+dataname=$(basename $dataname .nxe)
+dataname=$(basename $dataname .nxa)
+echo ">>> Converting $dataname..."
+#
+#
+#   Create vhdr and vmrk files so that we can use mne_brain_vision2fiff
+#
+cat > $$.vhdr <<EOF-VHDR
+Brain Vision Data Exchange Header File Version 1.0
+; Data created by the Vision Recorder
+
+[Common Infos]
+DataFile=DATA_NAME.nxe
+
+MarkerFile=DATA_NAME.vmrk
+
+DataFormat=BINARY
+; Data orientation: MULTIPLEXED=ch1,pt1, ch2,pt1 ...
+DataOrientation=MULTIPLEXED
+NumberOfChannels=64
+; Sampling interval in microseconds
+SamplingInterval=689.65517
+DataPoints=0
+
+[Binary Infos]
+BinaryFormat=INT_16
+
+[Channel Infos]
+; Each entry: Ch<Channel number>=<Name>,<Reference channel name>,
+; <Resolution in microvolts>,<Future extensions..
+; Fields are delimited by commas, some fields might be omitted (empty).
+; Commas in channel names are coded as "\1".
+Ch1=GateIn,,1526.0
+Ch2=Trig1,,1526.0
+Ch3=Trig2,,1526.0
+Ch4=EOG,,0.38147
+Ch5=  FP1,,0.076294
+Ch6=  FPZ,,0.076294
+Ch7=  FP2,,0.076294
+Ch8=  AF1,,0.076294
+Ch9=  AFZ,,0.076294
+Ch10= AF2,,0.076294
+Ch11=  F7,,0.076294
+Ch12=  F5,,0.076294
+Ch13=  F1,,0.076294
+Ch14=  FZ,,0.076294
+Ch15=  F2,,0.076294
+Ch16=  F6,,0.076294
+Ch17=  F8,,0.076294
+Ch18= FT9,,0.076294
+Ch19= FT7,,0.076294
+Ch20= FC5,,0.076294
+Ch21= FC3,,0.076294
+Ch22= FC1,,0.076294
+Ch23= FCZ,,0.076294
+Ch24= FC2,,0.076294
+Ch25= FC4,,0.076294
+Ch26= FC6,,0.076294
+Ch27= FT8,,0.076294
+Ch28=FT10,,0.076294
+Ch29=  T3,,0.076294
+Ch30=  C5,,0.076294
+Ch31=  C3,,0.076294
+Ch32=  C1,,0.076294
+Ch33=  CZ,,0.076294
+Ch34=  C2,,0.076294
+Ch35=  C4,,0.076294
+Ch36=  C6,,0.076294
+Ch37=  T4,,0.076294
+Ch38= TP9,,0.076294
+Ch39= TP7,,0.076294
+Ch40= CP5,,0.076294
+Ch41= CP3,,0.076294
+Ch42= CP1,,0.076294
+Ch43= CPZ,,0.076294
+Ch44= CP2,,0.076294
+Ch45= CP4,,0.076294
+Ch46= CP6,,0.076294
+Ch47= TP8,,0.076294
+Ch48=TP10,,0.076294
+Ch49=  P9,,0.076294
+Ch50=  P7,,0.076294
+Ch51=  P3,,0.076294
+Ch52=  P1,,0.076294
+Ch53=  PZ,,0.076294
+Ch54=  P2,,0.076294
+Ch55=  P4,,0.076294
+Ch56=  P8,,0.076294
+Ch57= P10,,0.076294
+Ch58= PO3,,0.076294
+Ch59= POZ,,0.076294
+Ch60= PO4,,0.076294
+Ch61=  O1,,0.076294
+Ch62=  OZ,,0.076294
+Ch63=  O2,,0.076294
+Ch64=  IZ,,0.076294
+
+[Comment]
+
+A m p l i f i e r  S e t u p
+============================
+Number of channels: 64
+Sampling Rate [Hz]: 1450
+Sampling Interval [µS]: 690
+
+
+EOF-VHDR
+sed "s/DATA_NAME/$dataname/" $$.vhdr > ${dataname}.vhdr
+rm -f $$.vhdr
+
+cat > $$.vmrk <<EOF-VMRK
+Brain Vision Data Exchange Marker File Version 1.0
+; Data created by the Vision Recorder
+
+[Common Infos]
+DataFile=DATA_NAME.nxe
+
+EOF-VMRK
+sed "s/DATA_NAME/$dataname/" $$.vmrk > ${dataname}.vmrk
+rm -f $$.vmrk
+#
+#    Do the conversion
+#
+mne_brain_vision2fiff --header ${dataname}.vhdr --out ${dataname}_raw.fif $orignames $digopt --eximia
+res=$?
+rm -f ${dataname}.vhdr
+rm -f ${dataname}.vmrk
+
+if [ $res -ne 0 ] ; then
+    echo "Failed to convert ${dataname}.nxe (see above)"
+    rm -f ${$}-dig.fif
+    exit 1
+fi
+
+echo
+echo ">>> ${dataname} converted."
+echo
+
+done
+
+rm -f ${$}-dig.fif
+echo "All requested data files converted"
+echo "Good bye."
+echo
+
+exit 0
+
+
+
+
+
+
+

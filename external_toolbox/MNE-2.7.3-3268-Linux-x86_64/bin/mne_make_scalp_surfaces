@@ -1,0 +1,157 @@
+#!/bin/sh
+#
+#
+#   This script creates scalp surface meshes in three different resolutions
+#
+#   Copyright 2009
+#
+#   Matti Hamalainen
+#   Athinoula A. Martinos Center for Biomedical Imaging
+#   Massachusetts General Hospital
+#   Charlestown, MA, USA
+#
+#   No part of this program may be photocopied, reproduced,
+#   or translated to another program language without the
+#   prior written consent of the author.
+#
+#   $Id$
+#
+usage()
+{
+	echo "usage: $0 [options]"
+	echo 
+	echo "     --overwrite             (to write over existing files)"
+	echo "     --subject subject       (defaults to SUBJECT environment variable)"
+	echo
+
+}
+if [ ! "$SUBJECTS_DIR" ]
+then
+	echo "The environment variable SUBJECTS_DIR should be set"
+	exit 1
+fi
+if [ ! "$MNE_ROOT" ]
+then
+    echo "MNE_ROOT environment variable is not set"
+    exit 1
+fi
+if [ ! "$FREESURFER_HOME" ] ; then 
+    echo "The FreeSurfer environment needs to be set up for this script"
+    exit 1
+fi
+force=false
+medium_ntri=30000
+sparse_ntri=2500
+#
+#	Parse the options
+#
+while [ $# -gt 0 ]
+do
+	case "$1" in  
+	--subject) 
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--subject: argument required."
+			exit 1
+		else
+			export SUBJECT=$1
+		fi
+		;;
+	--overwrite)
+		force=true
+		;;
+	--help)
+		usage
+		exit 1
+		;;
+	esac
+
+	shift
+done
+#
+#
+#	Check everything is alright
+#
+if [ ! "$SUBJECT" ]
+then
+	usage
+	exit 1
+fi
+if [ -f $SUBJECTS_DIR/$SUBJECT/mri/T1.mgz ] ; then
+   mri=T1.mgz
+else
+   mri=T1
+fi
+echo
+echo "1. Creating a dense scalp tessellation with mkheadsurf..." 
+echo
+if [ ! -f $SUBJECTS_DIR/$SUBJECT/surf/lh.seghead ] ; then
+   if [ ! -f $SUBJECTS_DIR/$SUBJECT/surf/lh.smseghead ] ; then
+      mkheadsurf -subjid $SUBJECT -srcvol $mri >/dev/null
+      if [ $? -ne 0 ] ; then
+	 echo "mkheadsurf failed"
+	 exit 1
+      fi
+   else
+       echo "$SUBJECTS_DIR/$SUBJECT/surf/lh.smseghead already there"
+   fi
+else
+    echo "$SUBJECTS_DIR/$SUBJECT/surf/lh.seghead already there"
+fi
+if [ -f $SUBJECTS_DIR/$SUBJECT/surf/lh.seghead ] ; then
+   surf=$SUBJECTS_DIR/$SUBJECT/surf/lh.seghead
+elif [ -f $SUBJECTS_DIR/$SUBJECT/surf/lh.smseghead ] ; then
+   surf=$SUBJECTS_DIR/$SUBJECT/surf/lh.smseghead
+else
+   echo "mkheadsurf did not produce the standard output file."
+   exit 1
+fi
+fif=$SUBJECTS_DIR/$SUBJECT/bem/${SUBJECT}-head-dense.fif
+echo
+echo "2. Creating $fif..."
+mne_surf2bem --surf $surf --id 4 --check --fif $fif
+if [ $? -ne 0 ] ; then
+   echo "Failed to create $fif, see above"
+   exit 1
+fi
+matlab=`which matlab`;
+if [ -x $matlab ] ; then
+    echo
+    echo "3. Creating medium grade tessellation..."
+    echo 
+    matlab="$matlab -nojvm -nodesktop -nodisplay"
+    echo "3.1 Decimating the dense tessellation..."
+    $matlab -r "mne_reduce_surface('$surf',$medium_ntri,'/tmp/$$');quit;"
+    fif=$SUBJECTS_DIR/$SUBJECT/bem/${SUBJECT}-head-medium.fif
+    echo
+    echo "3.2 Creating $fif..."
+    mne_surf2bem --surf /tmp/$$ --id 4 --check --fif $fif
+    if [ $? -ne 0 ] ; then
+	echo "Failed to create $fif, see above"
+	rm -f /tmp/$$
+	exit 1
+    fi
+    echo
+    echo "4. Creating the sparse tessellation..."
+    echo 
+    matlab="$matlab -nojvm -nodesktop -nodisplay"
+    echo "4.1 Decimating the dense tessellation..."
+    $matlab -r "mne_reduce_surface('$surf',$sparse_ntri,'/tmp/$$');quit;"
+    fif=$SUBJECTS_DIR/$SUBJECT/bem/${SUBJECT}-head-sparse.fif
+    echo
+    echo "4.2 Creating $fif..."
+    mne_surf2bem --surf /tmp/$$ --id 4 --check --fif $fif
+    if [ $? -ne 0 ] ; then
+	echo "Failed to create $fif, see above"
+	rm -f /tmp/$$
+	exit 1
+    fi
+else
+    echo "Matlab not available to decimate the surfaces"
+fi
+exit 0
+
+
+
+

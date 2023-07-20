@@ -1,0 +1,70 @@
+#!/bin/sh
+#
+#	View the manual with acroread or xpdf
+#
+#       Copyright 2006
+#
+#       Matti Hamalainen
+#       Athinoula A. Martinos Center for Biomedical Imaging
+#       Massachusetts General Hospital
+#       Charlestown, MA, USA
+#
+#       $Id: mne_view_manual 3000 2009-11-14 13:22:15Z msh $
+#
+#       Revision 1.1  2006/10/18 15:36:52  msh
+#       Added a script to view the manual from the standard location
+#
+#
+#
+if [ ! "$MNE_ROOT" ]
+then
+    echo "MNE_ROOT environment variable is not set"
+    exit 1
+fi
+while [ $# -gt 0 ]
+do
+	case "$1" in  
+	--help) 
+		echo "This script shows you the manual in a PDF reader"
+		exit 0
+	esac
+	shift
+done
+manual=`ls -t1 $MNE_ROOT/doc/*manual*pdf 2>/dev/null | head -1`
+if [ ! "$manual" ]
+then
+    manual=`ls -t1 $MNE_ROOT/share/doc/*manual*pdf 2>/dev/null | head -1`
+    if [ ! "$manual" ]
+    then
+	echo "The MNE manual PDF file could not be found"
+	exit 1
+    fi
+fi
+ostype=`uname -s | tr '[A-Z]' '[a-z]' | tr -d '-'`
+
+if [ "$ostype" = "darwin" ]
+then
+	open $manual
+else
+	if [ "`whereis xpdf | grep /`" ]
+	then
+		echo "Starting xpdf..."
+		xpdf $manual 2>/dev/null &
+		exit 0
+	fi
+	if [ "`whereis acroread | grep /`" ]
+	then
+		echo "Starting Acrobat Reader..."
+		acroread $manual 2>/dev/null &
+		exit 0
+	fi
+	echo "Neither Acrobat Reader nor xpdf found."
+fi
+exit 0
+
+
+
+		
+		
+	
+

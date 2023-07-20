@@ -1,0 +1,1202 @@
+!
+!	This is the X resource file for mne_analyze (class MneAnalyze)
+!
+!	$Id: MneAnalyze.ad 3131 2010-03-07 18:58:14Z msh $
+!
+!	Revision 1.73  2009/03/27 01:38:38  msh
+!	Added predefined colors to the color editor
+!	Version number is now 2.51
+!
+!	Revision 1.72  2009/03/05 11:33:33  msh
+!	Cahnged the labelling of the label dialog choices
+!	
+!	Revision 1.71  2009/02/22 20:10:08  msh
+!	Added resources for the new user-interface components
+!	
+!	Revision 1.70  2009/02/21 17:34:03  msh
+!	Improved the organization of the overlay management dialog
+!	
+!	Revision 1.69  2009/02/21 15:33:22  msh
+!	Added header and log to the initial comments
+!	
+!
+!
+MneAnalyze.title:			Fields and sources 
+*enableToggleVisual:			True
+*enableToggleColor:			True
+*fontList:             			-adobe-helvetica-medium-r-normal--14-*-iso8859-1
+!*highlightColor:			yellow
+!*highlightOnEnter:			true
+!*keyboardFocusPolicy:			pointer
+
+*Xmsh_error.dialogTitle:		A problem appeared...
+*Xmsh_message.dialogTitle:		Good for you to know...
+*Xmsh_warning.dialogTitle:		Just a little word of warning...
+*Xmsh_working.dialogTitle:		This will take a few...
+*Xmsh_working*okLabelString:		Stop
+*XmList.background:			#eaeaea
+*XmTextField.background:		#eaeaea
+!
+! Menus
+!
+*fileMenu.fontList:		        -adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*fileMenu.labelString:			File
+*fileMenu.mnemonic:			F
+
+*fileMenu*open.labelString:		Open...
+*fileMenu*open.mnemonic:		O
+*fileMenu*open.accelerator:		Meta<Key>O
+*fileMenu*open.acceleratorText:		Alt-O
+
+*fileMenu*openRaw.labelString:		Open raw...
+*fileMenu*openRaw.mnemonic:		w
+*fileMenu*openRaw.accelerator:		Meta<Key>w
+*fileMenu*openRaw.acceleratorText:	Alt-w
+
+*fileMenu*select.labelString:		Switch to data set...
+*fileMenu*select.mnemonic:		w
+
+*fileMenu*chdir.labelString:	        Change working directory...
+*fileMenu*chdir.mnemonic:		C
+
+*fileMenu*loadSurface.labelString:	Load Surface...
+*fileMenu*loadSurface.mnemonic:		S
+
+*fileMenu*loadMorphSurface.labelString:	Load morphing surface...
+*fileMenu*loadMorphSurface.mnemonic:	m
+
+*fileMenu*loadSurfacePatch.labelString:	Load surface patch...
+*fileMenu*loadSurfacePatch.mnemonic:	p
+
+*fileMenu*loadMorphSurfacePatch.labelString:	Load morphing surface patch...
+*fileMenu*loadMorphSurfacePatch.mnemonic:	r
+
+*fileMenu*loadDig.labelString:		Load digitizer data...
+*fileMenu*loadDig.mnemonic:		d
+
+*fileMenu*loadContHpi.labelString:	View continuous HPI data...
+*fileMenu*loadContHpi.mnemonic:		H
+
+*fileMenu*loadForward.labelString:	Load forward solution...
+*fileMenu*loadForward.mnemonic:		f
+
+*fileMenu*manageOverlays.labelString:	Manage overlays...
+*fileMenu*manageOverlays.mnemonic:	v
+
+*fileMenu*saveBads.labelString:		Save bad channel selection
+*fileMenu*saveBads.mnemonic:		b
+
+*fileMenu*quit.labelString:		Quit
+*fileMenu*quit.mnemonic:		Q
+*fileMenu*quit.accelerator:		Meta<Key>Q
+*fileMenu*quit.acceleratorText:		Alt-Q
+
+*adjustMenu.fontList:		        	-adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*adjustMenu.labelString:      			Adjust
+*adjustMenu.mnemonic:				A
+
+*adjustMenu*scalesPref.labelString:    		Scales...
+*adjustMenu*scalesPref.mnemonic:		S
+
+*adjustMenu*estimatePref.labelString:  		Estimates...
+*adjustMenu*estimatePref.mnemonic:		E
+
+*adjustMenu*filterPref.labelString:  		Raw data filter...
+*adjustMenu*filterPref.mnemonic:		R
+
+*adjustMenu*lightPref.labelString:  		Lights...
+*adjustMenu*lightPref.mnemonic:			L
+
+*adjustMenu*alignCoords.labelString:		Coordinate alignment...
+*adjustMenu*alignCoords.mnemonic:		C
+
+*adjustMenu*layoutPref.labelString:		Select trace layout...
+*adjustMenu*layoutPref.mnemonic:		y
+
+*adjustMenu*mappingPref.labelString:		Field mapping...
+*adjustMenu*mappingPref.mnemonic:		F
+
+*viewMenu.fontList:		        	-adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*viewMenu.labelString:      			View
+*viewMenu.mnemonic:				V
+
+*viewMenu*showViewer.labelString:		Show viewer...
+*viewMenu*showViewer.mnemonic:			v
+
+*viewMenu*showMriViewer.labelString:		Show MRI viewer...
+*viewMenu*showMriViewer.mnemonic:		M
+
+*viewMenu*showCoordinates.labelString:		Show coordinates...
+*viewMenu*showCoordinates.mnemonic:		c
+
+*viewMenu*showTimecourses.labelString:		Show timecourse manager...
+*viewMenu*showTimecourses.mnemonic:		t
+
+*viewMenu*showDipoles.labelString:		Show dipole list...
+*viewMenu*showDipoles.mnemonic:			d
+
+*labelMenu.fontList:		        	-adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*labelMenu.labelString:      			Labels
+*labelMenu.mnemonic:				L
+
+*labelMenu*loadLabel.labelString:		Load label...
+*labelMenu*loadLabel.mnemonic:			L
+
+*labelMenu*loadAllLabels.labelString:		Load all labels...
+*labelMenu*loadAllLabels.mnemonic:		a
+
+*labelMenu*loadParcellation.labelString:	Load parcellation...
+*labelMenu*loadParcellation.mnemonic:		a
+
+*labelMenu*showLabels.labelString:		Show label list...
+*labelMenu*showLabels.mnemonic:			S
+
+*labelMenu*discardAllLabels.labelString:	Discard all labels
+*labelMenu*discardAllLabels.mnemonic:	 	D
+
+*labelMenu*clearMarkedVertices.labelString:	Clear marked vertices
+*labelMenu*clearMarkedVertices.mnemonic:	m
+
+*dipoleMenu.fontList:		        	-adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*dipoleMenu.labelString:      			Dipoles
+*dipoleMenu.mnemonic:				D
+
+*dipoleMenu*setupDipoles.labelString:		Setup fitting...
+*dipoleMenu*setupDipoles.mnemonic:		S
+
+*dipoleMenu*showDipoles.labelString:		Show dipole list...
+*dipoleMenu*showDipoles.mnemonic:		l
+
+*dipoleMenu*showSelections.labelString:		Manage channel selections...
+*dipoleMenu*showSelections.mnemonic:		c
+
+*dipoleMenu*nameSelection.labelString:		Name current channel selection
+*dipoleMenu*nameSelection.mnemonic:		N
+
+
+*helpMenu.fontList:				-adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*helpMenu.labelString:				Help
+*helpMenu.mnemonic:				H
+
+*helpMenu*onVersion.labelString:		On version...
+*helpMenu*onLicense.labelString:		On license...
+*helpMenu*onVisual.labelString:		        On GLX...
+*helpMenu*whyBeep.labelString:			Why the beep?
+*helpMenu*showInfo.labelString:			Current status...
+*helpMenu*showInfo.accelerator:			<Key>F1
+*helpMenu*showInfo.acceleratorText:		F1
+!
+!	Main window
+!
+*mainWindow.width:				1550
+*mainWindow.height:				600
+!*mainWindow.width:				1000
+*mainWindow.height:				700
+*mainWindow*messageRow.resizeWidth:		true
+*mainWindow*messageRow.entryVerticalAlignment:	alignment_baseline_bottom
+*mainWindow*messageRow*orientation: 		horizontal
+*mainWindow*messageRow*time*columns: 		10
+*mainWindow*messageRow*time*labelString: 	time / ms :\ 
+*mainWindow*messageRow*time*XmTextField.translations: \
+#override  \n\
+None<Key>osfUp:		adjust_text_value(1)\n\
+None<Key>osfDown:	adjust_text_value(-1)\n\
+Ctrl<Key>osfUp:		adjust_text_value(10)\n\
+Ctrl<Key>osfDown:	adjust_text_value(-10)
+*mainWindow*messageRow*vertex*columns: 		10
+*mainWindow*messageRow*vertex*labelString: 	vertex # :\ 
+*mainWindow*messageRow*vertex*XmTextField.translations: \
+#override  \n\
+None<Key>osfUp:		adjust_text_value(1)\n\
+None<Key>osfDown:	adjust_text_value(-1)\n\
+Ctrl<Key>osfUp:		adjust_text_value(10)\n\
+Ctrl<Key>osfDown:	adjust_text_value(-10)
+*mainWindow*messageRow*absoluteTime*labelString:N/A
+*mainWindow*analyzeMessage*labelString: 	Ready to go...
+*mainWindow*analyzeMessage*alignment:   	alignment_beginning
+*mainWindow*analyzeMessage.marginWidth:  	5
+*mainWindow*analyzeMessage.marginHeight: 	5
+*mainWindow*fitDipole*labelString:              Fit ECD
+*mainWindow*fitDipole*marginWidth:              5
+!
+*coordinates_popup*dialogTitle:			Coordinates
+*coordinates*XmLabelGadget*FontList:        	-adobe-courier-medium-r-normal--12-*-iso8859-1
+!
+*XmDrawingArea.Background:			white
+*XmDrawingArea.resizePolicy:			resize_any
+!
+*work*paned.orientation:			horizontal
+
+*work*left.width:				300
+*work*left*XmDrawingArea.width:			300
+*work*left*singleChannel*plot.height:		120
+*work*left*SNRplot*plot.height:			120
+*work*left*MNEplot*plot.height:			120
+*work*left*singleChannel.paneMinimum:		150
+*work*left*MNEplot.paneMinimum:			150
+*work*left*SNRplot.paneMinimum:			150
+*work*left.paneMinimum:				100
+*work*left.paneMaximum:				300
+*work*right.width:				580
+*work*right.paneMinimum:			580
+*work*right.paneMaximum:			700
+*work*allChannels.paneMinimum:			100
+!
+!	The OpenGL windows
+!
+*GLwMDrawingArea*allocateBackground: 			TRUE
+*GLwMDrawingArea*rgba: 					TRUE
+!*GLwMDrawingArea*back: 					FALSE
+*GLwMDrawingArea*doubleBuffer:				TRUE
+*GLwMDrawingArea.translations: \
+#override	\n\
+<KeyDown>:     glwInput() \n\
+<KeyUp>:       glwInput() \n\
+<BtnDown>:     glwInput() \n\
+<BtnUp>:       glwInput() \n\
+<BtnMotion>:   glwInput()
+
+*work*anyHemi*title*labelString:			One hemisphere
+*work*anyHemi*glx*background:				#eaeaea
+!*work*anyHemi*traversalOn:				True
+
+*work*right*XmRowColumn.marginWidth:			0
+*work*right*XmRowColumn.marginHeight:			0
+*work*right*view.resizeWidth:				True
+*work*right*viewTitle.labelString:			Adjust view
+*work*right*view.orientation:				horizontal
+*work*right*view*radio.orientation:         		horizontal
+*work*right*view*radio.Left.labelString:    		L
+*work*right*view*radio.Right.labelString:   		R
+*work*right*view*radio.Both.labelString:   		B
+*work*right*view*radio.LeftMorphed.labelString:    	L
+*work*right*view*radio.RightMorphed.labelString:  	R
+*work*right*view*radio.Left.fontList:    		-adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*work*right*view*radio.Right.fontList:    		-adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*work*right*view*radio.Both.fontList:    		-adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*work*right*view*radio.LeftMorphed.fontList:    	-adobe-helvetica-bold-o-normal--14-*-iso8859-1
+*work*right*view*radio.RightMorphed.fontList:    	-adobe-helvetica-bold-o-normal--14-*-iso8859-1
+*work*right*view*radio*indicatorOn:			False
+*work*right*view*patch*indicatorOn:			False
+*work*right*view*morphed*indicatorOn:			False
+*work*right*view*morphed.labelString:  			M
+*work*right*view*morphed*shadowThickness:  		2
+*work*right*view*morphed.fontList:    			-adobe-helvetica-bold-o-normal--14-*-iso8859-1
+*work*right*view*patch*labelString:			P
+*work*right*view*patch*shadowThickness:			2
+*work*right*view*patch.fontList:    		        -adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*work*right*view*radio*XmToggleButton*shadowThickness:	2
+*work*right*view*moves.orientation:			horizontal
+*work*right*view*moves.marginWidth:			0
+*work*right*view*moves.marginHeight:			0
+*work*right*XmArrowButtonGadget.width:			25
+*work*right*view*left.arrowDirection:	 		arrow_left
+*work*right*view*right.arrowDirection:	 		arrow_right
+*work*right*view*up.arrowDirection: 	        	arrow_up
+*work*right*view*down.arrowDirection:	 		arrow_down
+*work*right*view*incr*columns:				3
+*work*right*view*incr.labelString:			+-
+*work*right*view*XmTextField.translations: \
+#override  \n\
+None<Key>osfUp:		adjust_text_value(1)\n\
+None<Key>osfDown:	adjust_text_value(-1)\n\
+Ctrl<Key>osfUp:		adjust_text_value(10)\n\
+Ctrl<Key>osfDown:	adjust_text_value(-10)
+
+*work*right*controls.orientation:			horizontal
+*work*right*controls.adjustLast:			False
+
+*work*right*outputTitle.labelString:			Output
+*work*right*output.orientation:				horizontal
+*work*right*output.adjustLast:				False
+*work*right*output.packing:				pack_column
+*work*right*output.entryAlignment:			alignment_center
+*work*right*output*XmPushButtonGadget.fontList:		-adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*work*right*output*XmPushButtonGadget.marginWidth:	5
+
+*work*right*wfile*labelString:				w
+*work*right*imagefile*labelString:			img
+*work*right*movie*labelString:				mov
+!
+!	Simple plots
+!
+*work*singleChannel*title*labelString:	Sample channel (N/A)
+*work*SNRplot*title*labelString:	SNR (N/A)
+*work*MNEplot*title.labelString:	MNE amplitude (not computed)
+*work*MNEplot*popup.labelString:	Options
+*work*MNEplot*keep.labelString:		Keep this timecourse
+*work*MNEplot*discard.labelString:	Forget kept timecourses
+*work*MNEplot*manager.labelString:	Show timecourse manager...
+*work*XmFrame.marginWidth:		5
+*work*XmFrame.marginHeight:		5
+!
+!	Full view
+!
+*work*allChannels*title*labelString:	Data
+*work*allChannels*popup.labelString:	Save graphics as
+*work*allChannels*time.alignment:	alignment_beginning
+*work*allChannels*time.labelString:	No time picked
+!
+!	Scales dialog
+!
+*scales*autoUnmanage:			False
+*scales*scalesTitle*labelString:	Scale adjustment
+*scales*dialogTitle:			Scales
+*scales*tmin*labelString:		Analyze range min [ms]
+*scales*tmax*labelString:		Analyze range max [ms]
+*scales*bmin*labelString:		Baseline min [ms]
+*scales*bmax*labelString:		Baseline max [ms]
+*scales*megmin*labelString:		MEG amp min [fT/cm]
+*scales*megmax*labelString:		MEG amp max [fT/cm]
+*scales*axmult*labelString:		MEG axmult [cm]
+*scales*eegmin*labelString:		EEG amp min [uV]
+*scales*eegmax*labelString:		EEG amp max [uV]
+*scales*row*adjustLast:			False
+*scales*apply*labelString:		Apply
+*scales*XmTextField.columns:		10
+*scales*XbaeCaption*labelOffset:	10
+*scales*rangeToggle*labelString:	Use full time range
+*scales*baselineToggle*labelString:	Baseline in use
+*scales*stimToggle*labelString:		Show stimulus channel
+!
+!	Information dialog
+!
+*info*dialogTitle:			Program status
+*info*autoUnmanage:			False
+*info*infoPane.width:			400
+*info*infoPane.height:			400
+*info*commentsTitle.labelString:	Current settings
+*info*commentsTitle*alignment:   	alignment_beginning
+*info*comments.labelString:		No information available
+*info*comments*alignment:   		alignment_beginning
+!
+*info*logTitle*labelString:		Logged messages
+*info*logTitle*alignment:   		alignment_beginning
+*info*logText.background:		#eaeaea
+*info*logText*editable:			False
+*info*logText*rows:			24
+*info*logText*columns:			80
+*info*okLabelString:			Hide
+*info*update*labelString:		Update log
+!
+!	File loading dialog
+!
+*loadFile*dialogTitle:			Load a new data set
+*loadFile*setFrame.width:		400
+*loadFile*setList*visibleItemCount:	4
+*loadFile*setList*selectionPolicy:	extended_select
+*loadFile*setFrame.marginWidth:		5
+*loadFile*setFrame.marginHeight:	5
+*loadFile*setTitle*labelString:		Available data sets
+*loadFile*invList*visibleItemCount:	4
+*loadFile*invFrame.marginWidth:		5
+*loadFile*invFrame.marginHeight:	5
+*loadFile*invTitle*labelString:		Inverse operator
+!*loadFile*pathMode:			PATH_MODE_RELATIVE
+*loadFile*dirList*visibleItemCount:	5
+*loadFile*nave*labelString:		nave (enter -1 for auto) :\ 
+*loadFile*nave*columns:			5
+*loadFile*aveRef*labelString:		Use EEG average electrode ref.
+*loadFile*aveRef*indicatorOn:		indicator_check_box
+*loadFile*optionsRow.orientation:	vertical
+*loadFile*naveRow.orientation:		horizontal
+*loadFile*naveRow.adjustLast:		False
+*loadFile*optionsTitle.labelString:	Options
+*loadFile*mriLabel.labelString:		MRI/MEG transform source :\ 
+*loadFile*mriRow.orientation:		horizontal
+*loadFile*mriRow.packing:		pack_tight
+*loadFile*mriName.labelString:		<None>
+*loadFile*mriDefault.labelString:	Default
+*loadFile*mriDefault.marginWidth:	5
+*loadFile*mriSelect.labelString:	Select...
+*loadFile*mriSelect.marginWidth:	5
+*loadFile*mriSelect.marginHeight:	5
+*loadMriTrans*dialogTitle:		Select MEG/MRI coordinate transform
+*loadMriTrans*gotoMRI*labelString:	Go to the MRI directory
+*loadMriTrans*gotoMRI*marginHeight:	3
+*loadMriTrans*gotoMRI*marginWidth:	10
+*loadMriTrans*row*adjustLast:		False
+!
+!	These are present in the raw data selector
+!
+*loadFile*eventsTitle.labelString:	Epochs to select
+*loadFile*selRow.orientation:		horizontal
+*loadFile*timesRow.orientation:		horizontal
+*loadFile*event*columns:		5
+*loadFile*tmin*columns:			5
+*loadFile*tmin*labelString:		Time range: from\ 
+*loadFile*tmax*labelString:		ms to \ 
+*loadFile*tmax*columns:			5
+*loadFile*tmin*value:			-200
+*loadFile*tmax*value:			500
+*loadFile*timesafter*labelString:	ms
+*loadFile*event*labelString:		Event :\ 
+*loadFile*eventLabel.labelString:	Event source :\ 
+*loadFile*eventName.labelString:	<None>
+*loadFile*eventSelect.labelString:	Select...
+*loadFile*eventSelect.marginWidth:	5
+*loadFile*eventSelect.marginHeight:	5
+*loadFile*eventSelect.sensitive:	False
+*loadEventFile*dialogTitle:		Select event file
+!
+!	Set selection dialog
+!
+*selectDataSet*dialogTitle:		Select a data set
+*selectDataSet*listLabelString:		Available data sets
+*selectDataSet*selectionLabelString:	Current data set
+*selectDataSet*autoUnmanage:		False
+*selectDataSet*okLabelString:		Done
+*selectDataSet*mustMatch:		True
+!
+!       Change directory dialog
+!
+*changeDir*dialogTitle:			Change working directory
+!
+!	Layout selection dialog (list version)
+!
+*layoutSelList*dialogTitle:			Layouts
+*layoutSelList*okLabelString:			Done
+*layoutSelList*applyLabelString:		Default
+*layoutSelList*listLabelString:			Available layouts
+*layoutSelList*listVisibleItemCount:		20
+!
+!	Surface loading dialog
+!
+*loadSurface*childPlacement:			place_below_selection
+*loadSurface*dialogTitle:			Load a surface
+*loadSurface*autoUnmanage:			False
+*loadSurface*visibleItemCount:			10
+
+*loadSurface*subjects*listLabelString:		Available subjects
+*loadSurface*subjects*selectionLabelString:	Selected subject
+
+*loadSurface*surfaces*listLabelString:		Available surfaces
+*loadSurface*surfaces*selectionLabelString:	Selected surface
+*loadSurface*sels.orientation:			horizontal
+*loadSurface*rots.leftAttachment:		attach_none
+*loadSurface*rots.rightAttachment:		attach_form
+*loadSurface*rots.topAttachment:		attach_form
+*loadSurface*rots.bottomAttachment:		attach_form
+
+
+*loadSurface*mustMatch:				True
+*loadSurface*row.adjustLast:			False
+*loadSurface*rotx*value:			0.0
+*loadSurface*rotx*columns:			10
+*loadSurface*rotx.labelString:			x-rotation (deg)
+*loadSurface*roty*value:			0.0
+*loadSurface*roty*columns:			10
+*loadSurface*roty.labelString:			y-rotation (deg)
+*loadSurface*rotz*value:			0.0
+*loadSurface*rotz.labelString:			z-rotation (deg)
+*loadSurface*rotz*columns:			10
+!
+!	Morphing surface loading dialog
+!
+*loadMorphSurface*childPlacement:		place_below_selection
+*loadMorphSurface*dialogTitle:			Load a morphing surface
+*loadMorphSurface*autoUnmanage:			False
+*loadMorphSurface*visibleItemCount:		10
+
+*loadMorphSurface*subjects*listLabelString:		Available subjects
+*loadMorphSurface*subjects*selectionLabelString:	Selected subject
+
+*loadMorphSurface*surfaces*listLabelString:		Available surfaces
+*loadMorphSurface*surfaces*selectionLabelString:	Selected surface
+*loadMorphSurface*sels.orientation:			horizontal
+*loadMorphSurface*rots.leftAttachment:			attach_none
+*loadMorphSurface*rots.rightAttachment:			attach_form
+*loadMorphSurface*rots.topAttachment:			attach_form
+*loadMorphSurface*rots.bottomAttachment:		attach_form
+
+
+*loadMorphSurface*mustMatch:			True
+*loadMorphSurface*row.adjustLast:		False
+*loadMorphSurface*rotx*value:			0.0
+*loadMorphSurface*rotx*columns:			10
+*loadMorphSurface*rotx.labelString:		x-rotation (deg)
+*loadMorphSurface*roty*value:			0.0
+*loadMorphSurface*roty*columns:			10
+*loadMorphSurface*roty.labelString:		y-rotation (deg)
+*loadMorphSurface*rotz*value:			0.0
+*loadMorphSurface*rotz.labelString:		z-rotation (deg)
+*loadMorphSurface*rotz*columns:			10
+!
+!	Patch loading dialog
+!
+*loadSurfacePatch*dialogTitle:			Load a patch
+*loadSurfacePatch*listLabelString:		Available patches
+*loadSurfacePatch*childPlacement:		place_below_selection
+*loadSurfacePatch*rotphi*value:			0.0
+*loadSurfacePatch*rotphi.labelString:		Rotation angle (deg)
+*loadSurfacePatch*rotphi*columns:		10
+!
+!	Hardcopy file selection boxes
+!
+!
+!	Hardcopy dialogs
+!
+*gifHardcopyFile_popup*title:			Select the destination GIF file
+*psHardcopyFile_popup*title:			Select the destination PS file
+*aiHardcopyFile_popup*title:			Select the destination Illustrator file
+*pngHardcopyFile_popup*title:			Select the destination PNG file
+*cgmHardcopyFile_popup*title:			Select the destination CGM file
+*svgHardcopyFile_popup*title:			Select the destination SVG file
+!
+!	MNE preferences dialog
+!
+*mnepref*autoUnmanage:			False
+*mnepref*mneprefTitle*labelString:	MNE preferences
+*mnepref*dialogTitle:			MNE preferences
+*mnepref*row2*orientation:		horizontal
+*mnepref*SNR*labelString:		SNR estimate
+*mnepref*std*labelString:		current std
+!*mnepref*std*editable:			False
+*mnepref*row*adjustLast:		False
+*mnepref*apply*labelString:		Apply
+*mnepref*XmTextField.columns:		10
+*mnepref*XbaeCaption*labelOffset:	10
+*mnepref*signedToggle*labelString:	Retain sign
+*mnepref*altNoiseToggle*labelString:	Use better noise normalization
+*mnepref*normalToggle*labelString:	Retain normal component only
+*mnepref*scaleToggle*labelString:	Show scale bar
+*mnepref*commentsToggle*labelString:	Show comments
+*mnepref*sketchToggle*labelString:	Show sketch
+
+*mnepref*row3.orientation:		horizontal
+
+*mnepref*estTitle*labelString:		Show
+*mnepref*MNEtoggle*labelString:		MNE
+*mnepref*MNEthreshToggle*labelString:	MNE (thresh)
+*mnepref*SPMtoggle*labelString:		dSPM
+*mnepref*sLORETAtoggle*labelString:	sLORETA
+*mnepref*noShowtoggle*labelString:	Nothing
+
+*mnepref*threshTitle*labelString:		 Mask with
+*mnepref*thresh*noThreshToggle*labelString:      Nothing
+*mnepref*thresh*XmToggleButtonGadget*sensitive:  false
+*mnepref*thresh*XmTextField*sensitive:		 false
+*mnepref*threshVal*labelString:			 Threshold : 
+*mnepref*threshVal*value:			 5
+
+*mnepref*optTitle*labelString:		Options
+
+*mnepref*scaleDisplay*glx.height:		90
+*mnepref*scaleDisplay*glx.width:		300
+*mnepref*scaleDisplay.marginWidth:		5
+*mnepref*scaleDisplay.marginHeight:		5
+*mnepref*scaleDisplay*title.labelString:	Value histogram
+
+*mnepref*scaleTitle.labelString:		Color scale
+*mnepref*row5.orientation:			horizontal
+*mnepref*histRefresh*labelString:		Refresh
+*mnepref*histRefresh*marginWidth:		5
+*mnepref*histRefresh*marginHeight:		3
+
+*mnepref*nstep.labelString:			# of smooth steps :\ 
+*mnepref*integ.labelString:			Time integr. (ms) :\ 
+*mnepref*alpha.labelString:			Opacity :\ 
+!
+!--- Dipole list
+!
+*dipoles_popup*dialogTitle:		Dipole sources
+*dipoles*list*visibleItemCount:		15
+!*dipoles*list*listSizePolicy:		constant
+*dipoles*list*scrollBarDisplayPolicy:	static
+*dipoles.width:			        550
+*dipoles*listFrame.marginWidth:		5
+*dipoles*listFrame.marginHeight:	5
+*dipoles*listTitle.labelString:		List of sources
+*dipoles*list.fontList:             	-adobe-courier-medium-r-normal--14-*-iso8859-1, -adobe-courier-bold-r-normal--14-*-iso8859-1=bold
+*dipoles*okLabelString:			Done
+*dipoles*clear.labelString:		Clear
+*dipoles*show.labelString:		Show
+*dipoles*save.labelString:		Save
+*dipoles*autoUnmanage:		        False
+*dipoles*showDist*toggle*labelString:    Max. distance for dipoles to show (mm) : \ 
+*dipoles*maxDist*toggle*labelString:     Paint all points closer than (mm) : \ 
+*dipoles*nsmooth*toggle*labelString:	 Number of smooth steps
+*dipoles*XmTextField*sensitive:          False
+*dipoles*XmTextField*columns:		 10
+*dipoles*keepPrev*labelString:		 Keep previous dipoles
+*dipoles*optTitle*labelString:		 Display options
+*dipoles*optTitle*indicatorOn:		 indicator_none
+*dipoles*optTitle*shadowThickness:	 1
+*dipoles*XmList*selectionPolicy:	 extended_select
+*dipoles*color.orientation:		 horizontal
+*dipoles*color*XmTextField*columns:	 5
+*dipoles*color*change*labelString:	 Color...
+*dipoles*color*apply*labelString:	 Apply
+
+*saveDipoleFile*dialogTitle:		 Save dipoles in a file
+*saveDipoleNote*labelString:		 Use bdip extension to create a binary file
+!
+!--- Snapshots
+!
+*saveWfile_popup*dialogTitle:		Name of the destination w file
+*saveImagefile_popup*dialogTitle:	Name of the destination image file
+*saveImagefile*imageTitle.labelString:	Available file types
+*saveImagefile*tif*labelString:		TIFF  (*.tif)
+*saveImagefile*rgb*labelString:		RGB   (*.rgb)
+*saveImagefile*pdf*labelString:		PDF   (*.pdf)
+*saveImagefile*jpg*labelString:		JPEG  (*.jpg)
+*saveImagefile*pnm*labelString:		PNM   (*.pnm)
+*saveImagefile*png*labelString:		PNG   (*.png)
+*saveImagefile*modes*labelString:	Output mode :\ 
+*saveImagefile*single.labelString:	Single
+*saveImagefile*snapshot.labelString:	Snapshots
+*saveImagefile*auto.labelString:	Automatic
+!
+!--- Movies
+!
+*saveMovie_popup*dialogTitle:		Produce a QuickTime movie
+*saveMovie*movieTitle*labelString:	Time range for the movie
+*saveMovie*movieFrame*row*adjustLast:	False
+*saveMovie*tmin*labelString:		Starting  time (ms)    :\ 
+*saveMovie*tmax*labelString:		Finishing time (ms)    :\ 
+*saveMovie*tstep*labelString:		Time step (ms)         :\ 
+*saveMovie*quality*labelString:		JPEG quality (0 - 100) :\ 
+*saveMovie*XmTextField*columns:		7
+!
+!---- Labels
+!
+*loadLabel_popup*dialogTitle:		Load label
+*loadLabel*gotoMRI*labelString:		Go to the MRI directory
+*loadLabel*gotoMRI*marginHeight:	3
+*loadLabel*gotoMRI*marginWidth:		10
+*loadLabel*row*adjustLast:		False
+!
+*loadAllLabels_popup*dialogTitle:	Load all labels
+*loadAllLabels*gotoMRI*labelString:	Go to the MRI directory
+*loadAllLabels*gotoMRI*marginHeight:	3
+*loadAllLabels*gotoMRI*marginWidth:	10
+*loadAllLabels*row*adjustLast:		False
+!
+*loadParcellation_popup*dialogTitle:	Load parcellation data
+*loadParcellation*listLabelString:      Available parcellations
+*loadParcellation*okLabelString:	Load
+*loadParcellation*autoUnmanage:		False
+!
+*labelList*autoUnmanage:		False
+*labelList_popup*dialogTitle:		Labels
+*labelList*listLabelString:		Available labels
+*labelList*selectionLabelString:	Current label
+*labelList*mustMatch:			True
+*labelList*choiceTitle.labelString:	Calculate
+*labelList*ave.labelString:		Average over vertices
+*labelList*max.labelString:		Maximum (sample by sample)
+*labelList*L2.labelString:		L2 norm (sample by sample)
+*labelList*L2time.labelString:		Pick vertex with largest L2 norm over time
+*labelList*okLabelString:		Done
+*labelList*applyLabelString:		Keep
+*saveLabel*dialogTitle:			Save label
+!
+!	Overlay management dialog
+!
+*overlays*autoUnmanage:			False
+*overlays*overlayTitle*labelString:	Overlay management
+*overlays*dialogTitle:			Overlay management
+*overlays*row*adjustLast:		False
+*overlays*okLabelString:		Done
+*overlays*apply*labelString:		Apply to all
+*overlays*show*labelString:		Show
+*overlays*apply*marginWidth:		10
+*overlays*XmTextField.columns:		10
+*overlays*XbaeCaption*labelOffset:	10
+*overlays*signedToggle*labelString:	Retain sign
+*overlays*scaleToggle*labelString:	Show scale bar
+*overlays*commentsToggle*labelString:	Show comments
+
+*overlays*estTitle*labelString:			Overlay type is
+
+*overlays*est*packing:				pack_column
+*overlays*est*numColumns:			2
+*overlays*SPMtoggle*labelString:		dSPM
+*overlays*sLORETAtoggle*labelString:		sLORETA
+*overlays*MNEtoggle*labelString:		MNE
+*overlays*fMRItoggle*labelString:		fMRI
+*overlays*otherToggle*labelString:		Other
+
+*overlays*optTitle*labelString:			Options
+
+*overlays*listForm.width:			300
+*overlays*scaleDisplay*glx.height:		90
+*overlays*scaleDisplay*glx.width:		300
+*overlays*scaleDisplay.marginWidth:		5
+*overlays*scaleDisplay.marginHeight:		5
+*overlays*scaleDisplay*title.labelString:	Value histogram
+
+*overlays*scaleTitle.labelString:		Color scale
+*overlays*row3.orientation:			horizontal
+
+*overlays*listFrame.marginWidth:		5
+*overlays*listFrame.marginHeight:		5
+*overlays*listFrame*sep.height:			15
+*overlays*listTitle.labelString:		Available overlays
+*overlays*listFrame*visualPolicy:		variable
+*overlays*list.visibleItemCount:		3
+*overlays*list.scrollBarDisplayPolicy:		static
+
+*overlays*listButtons.orientation:			horizontal
+*overlays*listButtons.entryAlignment:			alignment_center
+*overlays*listButtons*load*labelString:			Load w...
+*overlays*listButtons*loadstc*labelString:		Load stc...
+*overlays*listButtons*delete*labelString:		Delete
+*overlays*listButtons*save*labelString:			Save...
+*overlays*listButtons*XmPushButtonGadget*marginWidth:	10
+*overlays*listButtons*XmPushButtonGadget*marginHeight:	5
+*overlays*timescale*orientation:			horizontal
+*overlays*timescale*titleString:			Current time
+
+*overlays*nstep.labelString:				# of smooth steps :\ 
+*overlays*alpha.labelString:				Opacity :\ 
+*overlays*contourStep.labelString:                      Contour step
+*overlays*contoursToggle.labelString:                   Show scalp contours
+
+*loadOverlay_popup*dialogTitle:				Load overlay (w)
+*loadOverlay*headOverlay.labelString:			Scalp overlay
+*loadOverlay*headOverlay.alignment:			alignment_beginning
+*loadStcOverlay_popup*dialogTitle:			Load overlay (stc)
+*loadStcOverlay*headOverlay.labelString:		Scalp overlay
+*loadStcOverlay*headOverlay.alignment:			alignment_beginning
+*saveOverlay_popup*dialogTitle:				Save overlay
+!
+!--- light controls
+!
+*lightPref*lightTitle*labelString:		Light controls
+*lightPref*dialogTitle:				Lights
+*lightPref*XmToggleButtonGadget*indicatorOn:	indicator_check_box
+*lightPref*XmTextField*columns:			7
+*lightPref*label1*labelString:			x-pos
+*lightPref*label2*labelString:			y-pos
+*lightPref*label3*labelString:			z-pos
+*lightPref*label4*labelString:			R
+*lightPref*label5*labelString:			G
+*lightPref*label6*labelString:			B
+*lightPref*apply*labelString:			Apply
+*lightPref*autoUnmanage:			False
+*lightPref*XmFrame.marginWidth:			10
+*lightPref*XmFrame.marginHeight:		10
+*lightPref*color.labelString:			Color...
+!
+!	Filter
+!
+*filter*dialogTitle:			Adjust filter
+*filter*autoUnmanage:			False
+*filter*filterTitle*labelString:	Filter settings
+*filter*hp*labelString:			Highpass (Hz) 
+*filter*hp_width*labelString:		Highpass transition (Hz) 
+*filter*lp*labelString:			Lowpass (Hz) 
+*filter*lp_width*labelString:		Lowpass transition (Hz) 
+*filter*onoff*labelString:		Filter active
+*filter*apply*labelString:		Apply
+!
+!---- The viewer
+!
+*viewer*dialogTitle:					Viewer
+*viewer*viewerDisplay*title.labelString:		Canvas
+*viewer*viewerDisplay*glx.width:			500
+*viewer*viewerDisplay*glx.height:			500
+*viewer*viewerDisplay.marginHeight:			5
+*viewer*viewerDisplay.marginWidth:			5
+*viewer*viewTitle.labelString:				Adjust view
+*viewer*controls.orientation:				horizontal
+*viewer*view.orientation:				horizontal
+*viewer*view*moves.orientation:				horizontal
+*viewer*view*moves.marginWidth:				0
+*viewer*view*moves.marginHeight:			0
+*viewer*XmArrowButtonGadget.width:			25
+*viewer*view*left.arrowDirection:	 		arrow_left
+*viewer*view*right.arrowDirection:	 		arrow_right
+*viewer*view*up.arrowDirection: 	        	arrow_up
+*viewer*view*down.arrowDirection:	 		arrow_down
+*viewer*view*incr*columns:				3
+*viewer*view*incr.labelString:				+-
+*viewer*view*XmTextField.translations: \
+#override  \n\
+None<Key>osfUp:		adjust_text_value(1)\n\
+None<Key>osfDown:	adjust_text_value(-1)\n\
+Ctrl<Key>osfUp:		adjust_text_value(10)\n\
+Ctrl<Key>osfDown:	adjust_text_value(-10)
+
+
+
+*viewer*outputTitle.labelString:			Output
+*viewer*output.orientation:				horizontal
+*viewer*output.adjustLast:				False
+*viewer*output.packing:					pack_column
+*viewer*output.entryAlignment:				alignment_center
+*viewer*output*XmPushButtonGadget.fontList:		-adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*viewer*output*XmPushButtonGadget.marginWidth:		5
+*viewer*okLabelString:					Done
+
+*viewer*wfile*labelString:				w
+*viewer*rgbfile*labelString:				rgb
+*viewer*movie*labelString:				mov
+*viewer*imagefile*labelString:				img
+*viewer*opt*labelString:				Options...
+*viewer*scale*labelString:				Rescale
+*viewer*reload*labelString:                             Reload
+*viewer*reloadHpi*labelString:                          Reload HPI
+!
+!--- viewer options
+!
+*viewerOptions*item.labelString:			Item to show
+*viewerOptions*option.labelString:			Option
+*viewerOptions*item.alignment:			        alignment_beginning
+*viewerOptions*option.alignment:			alignment_beginning
+*viewerOptions*dialogTitle:				Viewer options
+*viewerOptions*XmTextField*columns:			7
+*viewerOptions*okLabelString:				Done
+*viewerOptions*optionsTitle*labelString:		Display components
+*viewerOptions*trans*labelString:			Transparent
+*viewerOptions*lh*labelString:				Left hemi
+*viewerOptions*rh*labelString:				Right hemi
+*viewerOptions*head*labelString:			Scalp
+*viewerOptions*outerSkull*labelString:			Outer skull
+*viewerOptions*innerSkull*labelString:			Inner skull
+*viewerOptions*helmet*labelString:			Helmet
+*viewerOptions*coils*labelString:			MEG sensors
+*viewerOptions*els*labelString:				EEG electrodes
+*viewerOptions*megCont*labelString:			MEG field map
+*viewerOptions*eegCont*labelString:			EEG potential map
+*viewerOptions*dig*labelString:				Digitizer data
+*viewerOptions*digOption*labelString:			HPI and landmarks only
+*viewerOptions*estimates*labelString:			Activity estimates
+*viewerOptions*XmToggleButtonGadget.alignment:		alignment_beginning
+*viewerOptions*XmFrame.marginWidth:			5
+*viewerOptions*XmFrame.marginHeight:			5
+*viewerOptions*autoUnmanage:				False
+*viewerOptions*apply*labelString:			Apply
+*viewerOptions*okLabelString:				Done
+*viewerOptions*color.labelString:			Color...
+*imageFileName_popup*title:				Enter image file name template
+
+*loadDig*dialogTitle:					Load digitizer data
+*loadForward*dialogTitle:				Load forward operator
+!
+!---- MRI viewer control
+!
+*mriViewer_popup*title:                                 MRI viewer control
+*mriViewer*commandRow.orientation:			Horizontal
+*mriViewer*command*marginWidth:			        4
+*mriViewer*command*marginHeight:		        4
+*mriViewer*command*promptString:			Enter a tkmedit command :
+*mriViewer*commandTitle*labelString:			Input
+*mriViewer*logTitle*labelString:			Output
+*mriViewer*logText.background:				#eaeaea
+*mriViewer*logText*editable:				False
+*mriViewer*logText*rows:				15
+*mriViewer*logText*columns:				40
+*mriViewer*XmFrame.marginWidth:				5
+*mriViewer*XmFrame.marginHeight:			5
+*mriViewer*optionsTitle*labelString:			Display options
+*mriViewer*showCommands.labelString:			Show command input and output
+*mriViewer*showCommands.indicatorOn:			indicator_none
+*mriViewer*showCommands.shadowThickness:		1
+*mriViewer*showViewerControls.labelString:		Show MRI viewer user interface
+*mriViewer*followSurface.labelString:			Track surface location in MRI
+*mriViewer*showDipoles.labelString:			Show dipole locations in MRI
+*mriViewer*interpolate.labelString:			Interpolate voxels
+*mriViewer*maxIntensityProj.labelString:		Max. intensity projection
+*mriViewer*showDigitizerData.labelString:		Show digitizer data in MRI
+*mriViewer*showSurfaceData.labelString:			Show surface data in MRI
+*mriViewer*showSurfaceData.marginWidth:			10
+*mriViewer*showSurfaceData.marginHeight:		4
+*mriViewer*showSegmentationData.labelString:		Show segmentation data in MRI
+*mriViewer*recenter.labelString:			Recenter MRI display
+*mriViewer*recenter.marginWidth:			10
+*mriViewer*recenter.marginHeight:			4
+*mriViewer*okLabelString:				Hide
+!
+!---- Coordinate alignment
+!
+*alignCoords*dialogTitle:				Adjust coordinate alignment
+*alignCoords*XmTextField*columns:			7
+*alignCoords*okLabelString:				Done
+*alignCoords*apply.labelString:				Apply
+*alignCoords*autoUnmanage:				False
+
+*alignCoords*xLabel.labelString:			x/mm (left/right)
+*alignCoords*yLabel.labelString:			y/mm (back/front)
+*alignCoords*zLabel.labelString:			z/mm (down/up)
+*alignCoords*rotxLabel.labelString:			x rot/deg
+*alignCoords*rotyLabel.labelString:			y rot/deg
+*alignCoords*rotzLabel.labelString:			z rot/deg
+*alignCoords*align.labelString:				Align using fiducials
+
+*alignCoords*alignTitle.labelString:			Coordinate adjustments
+*alignCoords*dir.labelString:				Direction
+*alignCoords*step.labelString:				Step / mm or deg
+*alignCoords*amount.labelString:			Amount
+*alignCoords*XmTextField.value:				1.0
+*alignCoords*XmFrame.marginWidth:			10
+*alignCoords*XmFrame.marginHeight:			10
+*alignCoords*XmArrowButtonGadget.width:			30
+*alignCoords*XmArrowButtonGadget.height:		30
+*alignCoords*XmArrowButtonGadget.shadowThickness:	1
+
+*alignCoords*xDown*arrowDirection:			arrow_left
+*alignCoords*xUp*arrowDirection:			arrow_right
+*alignCoords*yDown*arrowDirection:			arrow_left
+*alignCoords*yUp*arrowDirection:			arrow_right
+*alignCoords*zDown*arrowDirection:			arrow_down
+*alignCoords*zUp*arrowDirection:			arrow_up
+
+*alignCoords*rotxDown*labelString:			L
+*alignCoords*rotxUp*labelString:			R
+*alignCoords*rotyDown*labelString:			L
+*alignCoords*rotyUp*labelString:			R
+*alignCoords*rotzDown*labelString:			L
+*alignCoords*rotzUp*labelString:			R
+
+*alignCoords*sep.height:				20
+*alignCoords*xAmount.value:				0.0
+*alignCoords*yAmount.value:				0.0
+*alignCoords*zAmount.value:				0.0
+
+*alignCoords*buttons.orientation:			horizontal
+*alignCoords*buttons.load.labelString:			Load...
+*alignCoords*buttons.saveDefault.labelString:		Save default
+*alignCoords*buttons.save.labelString:			Save...
+*alignCoords*buttons.saveSet.labelString:		Save MRI set
+*alignCoords*buttons.discard.labelString:		Omit...
+*alignCoords*buttons*XmPushButtonGadget.marginHeight:	5
+*alignCoords*buttons*XmPushButtonGadget.marginWidth:	10
+
+*alignCoords*table2*XmLabelGadget.alignment:		alignment_beginning
+*alignCoords*table2*step.alignment:			alignment_center
+*alignCoords*table2*amount.alignment:			alignment_center
+*alignCoords*table2*x.alignment:			alignment_center
+*alignCoords*table2*y.alignment:			alignment_center
+*alignCoords*table2*z.alignment:			alignment_center
+*alignCoords*table2*x.labelString:			xMRI / mm
+*alignCoords*table2*y.labelString:			yMRI / mm
+*alignCoords*table2*z.labelString:			zMRI / mm
+
+*alignCoords*table2*XmToggleButton.indicatorOn:			indicator_none
+*alignCoords*table2*XmToggleButton.alignment:			alignment_center
+*alignCoords*table2*XmToggleButton.shadowThickness:		2
+*alignCoords*table2*XmToggleButton.fillOnSelect:		True
+*alignCoords*table2*XmToggleButton.selectColor:			red
+*alignCoords*table2*LAPToggle.labelString:			LAP
+*alignCoords*table2*RAPToggle.labelString:			RAP
+*alignCoords*table2*NasionToggle.labelString:			Nasion
+*alignCoords*table2*fid.labelString:				Fiducial
+*alignCoords*table2*XmTextField.editable:			False
+*alignCoords*iter.labelString:					ICP align
+*alignCoords*niter.value:					1
+*alignCoords*niter.columns:					3
+*alignCoords*iterTimes.labelString:				steps
+*alignCoords*fixNasion.labelString:				Try to keep nasion in place
+*alignCoords*iterTimes.alignment:				alignment_beginning
+
+*alignCoords*dist*dialogTitle:						Discard some points
+*alignCoords*dist*autoUnmanage:						False
+*alignCoords*dist*selectionLabelString:					Max. distance / mm
+*alignCoords*dist*textString:						5.0
+
+*saveMriTrans*dialogTitle:						Save MRI/MEG transformation
+*saveMriTrans*row*orientation:						horizontal
+*saveMriTrans*overwriteToggle*labelString:				Overwrite existing transform
+*saveMriTrans*overwriteToggle*indicatorOn:				indicator_check_box
+
+*alignCoords*loadMriTrans*dialogTitle:					Load MRI/MEG transformation
+*alignCoords*loadMriTrans*gotoMRI*labelString:				Go to the MRI directory
+*alignCoords*loadMriTrans*gotoMRI*marginHeight:	      			3
+*alignCoords*loadMriTrans*gotoMRI*marginWidth:				10
+*alignCoords*loadMriTrans*row*adjustLast:				False
+!
+!--- Timecourse manager
+!
+*timecourseManager*dialogTitle:						Timecourse manager
+*timecourseManager*managerTitle.labelString:				Saved timecourses
+*timecourseManager*scroll.width:					400
+*timecourseManager*scroll.height:					500
+!*timecourseManager*scroll.scrollBarDisplayPolicy:			static
+*timecourseManager*scroll.scrollingPolicy:				automatic
+*timecourseManager*table*onoff.indicatorOn:				indicator_check_box
+*timecourseManager*table*forget.labelString:				Forget
+*timecourseManager*table*color.labelString:				Color...
+*timecourseManager*table*save.labelString:				Save...
+
+*timecourseManager*table*desc.labelString:				Timecourse description will be displayed here
+*timecourseManager*table*XmPushButtonGadget.marginWidth:		5
+*timecourseManager*table*XmPushButtonGadget.marginHeight:		5
+*timecourseManager*XmLabelGadget.alignment:				alignment_beginning
+*timecourseManager*XmFrame.marginWidth:					10
+*timecourseManager*XmFrame.marginHeight:				10
+*timecourseManager*table.verticalSpacing:				10
+*timecourseManager*okLabelString:					Done
+*saveTimecourse*dialogTitle:						File a timecourse
+*saveTimecourse*all*labelString:					Save all timecourses within the label
+*saveTimecourse*tbyt*labelString:					Time-by-time output
+*saveTimecourse*coords*labelString:					Include coordinates
+*saveTimecourse*verts*labelString:					Include vertex numbers
+!
+!--- The general-purpose color editor
+!
+*coloredit*dialogTitle:			Color editor
+*coloredit*apply.labelString:		Apply
+*coloredit*sample.height:		100
+*coloredit*sample.recomputeSize:	false
+*coloredit*XmScale*orientation:		horizontal
+*coloredit*XmScale*showValue:		true
+*coloredit*XmScale*sliderMark:		thumb_mark
+*coloredit*red*titleString:		Red
+*coloredit*green*titleString:		Green
+*coloredit*blue*titleString:		Blue
+*coloredit*table.horizontalSpacing:	20
+*coloredit*table.marginWidth:		20
+*coloredit*table.marginHeight:		20
+*coloredit*sample.alignment:		alignment_center
+*coloredit*sample.fontList:	       -adobe-helvetica-bold-r-normal--14-*-iso8859-1
+*coloredit*sample.labelString:		Sample
+*coloredit*autoUnmanage:		False
+*coloredit*predefRow*packing:		pack_column
+*coloredit*predefRow*numColumns:	6
+*coloredit*predefRow.orientation:	vertical
+*coloredit*predefRow.marginHeight:	10
+*coloredit*predefRow*spacing:		0
+*coloredit*predefRow*predef.marginHeight:	8
+*coloredit*predefRow*predef.marginWidth:	20
+*coloredit*predefRow*predef.shadowThickness:	1
+*coloredit*predefRow*predef.labelString:	
+!
+!-- Field mapping preferences
+!
+*mappingPref*autoUnmanage:		False
+*mappingPref*dialogTitle:		Field mapping preferences
+*mappingPref*apply.labelString:		Apply
+*mappingPref*controls.orientation:	vertical
+*mappingPref*adjustLast:		false
+*mappingPref*inner.orientation:		horizontal
+*mappingPref*megTitle.labelString:	MEG
+*mappingPref*eegTitle.labelString:	EEG
+*mappingPref*miss.labelString:		SVD truncation at :\ 
+*mappingPref*miss*columns:		8
+*mappingPref*x.labelString:		Origin x (head/mm) :\ 
+*mappingPref*x*columns:		        6
+*mappingPref*y.labelString:		Origin y (head/mm) :\ 
+*mappingPref*y*columns:		        6
+*mappingPref*z.labelString:		Origin z (head/mm) :\ 
+*mappingPref*z*columns:		        6
+*mappingPref*smooth.labelString:	Number of smoothsteps :\ 
+*mappingPref*smooth*columns:	        6
+*mappingPref*grade.labelString:	        Downsampling grade :\ 
+*mappingPref*grade*columns:	        6
+*mappingPref*head.labelString:		Extrapolate to scalp
+*mappingPref*intrad.labelString:	Reconstruction surface radius (mm) :\ 
+*mappingPref*intrad*columns:		7
+*mappingPref*default.labelString:	Use default origin
+*mappingPref*megStep.labelString:	MEG contour step (fT) :\ 
+*mappingPref*megStep*columns:	        6
+*mappingPref*eegStep.labelString:	EEG contour step (uV) :\ 
+*mappingPref*eegStep*columns:	        6
+
+
+!
+!--- Continuous HPI stuff
+!
+*loadContHpi*dialogTitle:		Load continuous HPI data
+*showContHpi*dialogTitle:		Show continuous HPI data
+*showContHpi*deleteResponse:		destroy
+
+*showContHpi*row3*orientation:		        horizontal
+*showContHpi*scale*orientation:		        horizontal
+*showContHpi*scale*showValue:		        near_slider
+*showContHpi*scale*sliderMark:		        round_mark
+*showContHpi*okLabelString:		        Done
+*showContHpi*hpiDisplay*title*labelString:	Overview
+*showContHpi*explain*labelString:	g-value : red  (0.9..1.0) \
+
+*showContHpi*hpiDisplay*glx.height:		100
+*showContHpi*hpiDisplay*glx.width:		300
+*showContHpi*hpiDisplay.marginWidth:		15
+*showContHpi*hpiDisplay.marginHeight:		5
+
+*showContHpi*infoTitle*labelString:		Continuous HPI data
+*showContHpi*row2.marginWidth:			10
+
+*showContHpi*row4.orientation:			horizontal
+*showContHpi*gExp*labelString:			g-value (0.9...1.0)
+*showContHpi*velExp*labelString:		Angular velocity
+*showContHpi*moveExp*labelString:		Average coil movement
+*showContHpi*moveDown*arrowDirection:		arrow_down
+*showContHpi*velDown*arrowDirection:		arrow_down
+
+*showContHpi*gExp.Foreground:			red
+*showContHpi*velExp.Foreground:			green
+*showContHpi*velNow.Foreground:			green
+*showContHpi*moveExp.Foreground:		blue
+*showContHpi*moveNow.Foreground:		blue
+*showContHpi*row4*XmRowColumn.background:	white
+*showContHpi*row4*XmLabelGadget.background:	white
+*showContHpi*row4*XmRowColumn.marginWidth:	1
+*showContHpi*row4*XmRowColumn.spacing:		0
+*showContHpi*row4*XmArrowButton*shadowThickness:	1
+*showContHpi*row4*XmArrowButton*shadowThickness:	1
+
+*showContHpi*row41.orientation:			horizontal
+*showContHpi*row42.orientation:			horizontal
+*showContHpi*row43.orientation:			horizontal
+!
+!	Dipole fitting preferences
+!
+*dipoleFitPref*autoUnmanage:			False
+*dipoleFitPref*dialogTitle:			Dipole fitting preferences
+*dipoleFitPref*row.orientation:			vertical
+*dipoleFitPref*current.labelString:		<not set>
+*dipoleFitPref*unset.labelString:		Unset
+*dipoleFitPref*select.labelString:		...
+*dipoleFitPref*select.marginHeight:		3
+*dipoleFitPref*select.marginWidth:		5
+*dipoleFitPref*unset.marginWidth:		5
+!
+*dipoleFitPref*fwdTitle*labelString:            Forward model
+*dipoleFitPref*fwdFrame*XmTextField.columns:	7
+*dipoleFitPref*fwdFrame*inner.adjustLast:	False
+*dipoleFitPref*fwdFrame*x0.labelString:		Sphere origin x [mm] :\ 
+*dipoleFitPref*fwdFrame*y0.labelString:		Sphere origin y [mm] :\ 
+*dipoleFitPref*fwdFrame*z0.labelString:		Sphere origin z [mm] :\ 
+*dipoleFitPref*fwdFrame*rad.labelString:	EEG scalp radius [mm] :\ 
+*dipoleFitPref*fwdFrame*name.labelString:	EEG sphere model name :\ 
+*dipoleFitPref*fwdFrame*accurate.labelString:	Accurate field calculation
+!
+*dipoleFitPref*bem.orientation:			horizontal
+*dipoleFitPref*bem.label*labelString:		BEM model :\ 
+!
+*dipoleFitPref*modTitle.labelString:		Modalities
+
+*dipoleFitPref*noiseTitle*labelString:		 Noise estimate
+*dipoleFitPref*noise.orientation:		 horizontal
+*dipoleFitPref*noise.label.labelString:		 Noise covariance :\ 
+*dipoleFitPref*noiseFrame*diagnoise*labelString: Omit off-diagonal terms
+*dipoleFitPref*noiseFrame*XmTextField.columns:	 6
+*dipoleFitPref*noiseFrame*inner.adjustLast:	 False
+*dipoleFitPref*noiseFrame*gradNoise.labelString: Planar fixed [fT/cm] :\ 
+*dipoleFitPref*noiseFrame*magNoise.labelString:	 Axial fixed [fT] :\ 
+*dipoleFitPref*noiseFrame*eegNoise.labelString:	 EEG fixed [uV] :\ 
+*dipoleFitPref*noiseFrame*reg.labelString:	 Regularization :\ 
+!
+!
+*pickFile.dialogTitle:		Pick a file
+*pickFile*gotoMRI*labelString:	Go to the default directory
+*pickFile*gotoMRI*marginHeight:	3
+*pickFile*gotoMRI*marginWidth:	10
+!
+!
+*selectionList_popup*dialogTitle:	Channel selections
+*selectionList*listLabelString:		Current selection
+*selectionList*okLabelString:		Done
+*selectionList*cancelLabelString:	Save
+*selectionList*applyLabelString:	Delete
+*selectionList*name.labelString:	Add...
+*selectionList*autoUnmanage:		False
+!
+*nameSelection_popup*dialogTitle:	Name this selection
+*nameSelection*selectionLabelString:	Name for the current selection :\ 
+*nameSelection*autoUnmanage:		False
+
+
+

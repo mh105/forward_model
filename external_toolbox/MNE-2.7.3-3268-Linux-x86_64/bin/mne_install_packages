@@ -1,0 +1,54 @@
+#!/bin/sh
+#
+#     This scripts installs the necessary open source packages 
+#     using fink
+#
+#     $Id: mne_install_packages 2902 2009-10-31 23:00:23Z nicks $
+#
+#     Revision 1.1  2006/11/06 18:23:31  msh
+#     Added mne_install_packages
+#
+#
+#
+fink=/sw/bin/fink
+config_guess="`dirname $0`/config.guess"
+if [ ! -x $fink ]
+then
+	echo "Please install fink before running this script"
+	exit 1
+fi
+if [ ! -x $config_guess ]
+then
+	echo "$config_guess not found"
+	echo "Have you tried to reorganize the MNE distribution yourself?"
+	exit 1
+fi
+$config_guess | grep 'apple-darwin' >/dev/null 2>&1
+if [ $? -ne 0 ]
+then
+	echo "You only need to run this script on Mac OSX"
+	echo "Thank you for your attention to this matter."
+	exit 0
+fi
+if [ `id -u` -ne 0 ]
+then
+	echo "You need to be root to run this script"
+	exit 1
+fi
+packages="netpbm-bin openmotif3-shlibs libtiff-shlibs libjpeg-shlibs libpng3-shlibs"
+echo
+echo "Installing all packages needed by the MNE software..."
+echo
+for package in $packages
+do
+	echo "Installing package $package..."
+	$fink install $package
+	echo "Done"
+	echo
+done
+echo "You should be now well equipped to run the MNE software"
+echo "Thank you for your attention to this matter."
+echo
+exit 0
+
+

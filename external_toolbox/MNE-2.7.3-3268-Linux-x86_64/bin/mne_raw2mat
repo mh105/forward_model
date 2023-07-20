@@ -1,0 +1,68 @@
+#!/bin/sh -ef
+#
+#   Script to set matlab lib path, for use in wrapper scripts which
+#   need the matlab shared libs.  This setup is not done in the main
+#   mne_setup because doing so pollutes the entire environment.
+#
+#   Copyright 2009
+#
+#   Nick Schmansky
+#   Athinoula A. Martinos Center for Biomedical Imaging
+#   Massachusetts General Hospital
+#   Charlestown, MA, USA
+#
+
+OS=`uname -s`
+PROC=`uname -p`
+
+#
+# check for MATLAB_ROOT and exit if not found
+#
+if [ ! "$MATLAB_ROOT" ] ; then
+    echo "ERROR: The environment variable MATLAB_ROOT is not defined!"
+    echo "       Set MATLAB_ROOT to the directory where Matlab is installed."
+    exit 1
+fi
+if [ ! -e "$MATLAB_ROOT" ] ; then
+    echo "ERROR: $MATLAB_ROOT "
+    echo "       does not exist. Check that this value is correct.";
+    exit 1
+fi
+
+#
+# add appropriate matlab lib dir to (DY)LD_LIBRARY_PATH
+#
+if [ "x$OS" == "xLinux" ] ; then
+    if [ "x$PROC" == "xx86_64" ] ; then
+        MATLAB_LIB_PATH=($MATLAB_ROOT/bin/glnxa64)
+    else
+        MATLAB_LIB_PATH=($MATLAB_ROOT/bin/glnx86)
+    fi
+    if [ ! -e $MATLAB_LIB_PATH ] ; then
+        echo "$MATLAB_LIB_PATH does not exist! Unknown Matlab installation."
+    else
+        if [ ! "$LD_LIBRARY_PATH" ] ; then
+            LD_LIBRARY_PATH=$MATLAB_LIB_PATH
+        else
+            LD_LIBRARY_PATH="$MATLAB_LIB_PATH":"$LD_LIBRARY_PATH"
+        fi
+        export LD_LIBRARY_PATH
+    fi
+elif [ "x$OS" == "xDarwin" ] ; then
+    if [ "x$PROC" == "xi386" ] ; then
+        MATLAB_LIB_PATH=($MATLAB_ROOT/bin/maci)
+    else
+        MATLAB_LIB_PATH=($MATLAB_ROOT/bin/mac)
+    fi
+    if [ ! -e $MATLAB_LIB_PATH ] ; then
+        echo "$MATLAB_LIB_PATH does not exist! Unknown Matlab installation."
+    else
+        if [ ! "$DYLD_LIBRARY_PATH" ] ; then
+            DYLD_LIBRARY_PATH=$MATLAB_LIB_PATH
+        else
+            DYLD_LIBRARY_PATH="$MATLAB_LIB_PATH":"$DYLD_LIBRARY_PATH"
+        fi
+        export DYLD_LIBRARY_PATH
+    fi
+fi
+$MNE_ROOT/bin/mne_raw2mat.bin $*

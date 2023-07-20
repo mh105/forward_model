@@ -1,0 +1,425 @@
+#!/bin/sh
+#
+#	This script greatly simplifies the forward calculations
+#
+#       Copyright 2006
+#
+#       Matti Hamalainen
+#       Athinoula A. Martinos Center for Biomedical Imaging
+#       Massachusetts General Hospital
+#       Charlestown, MA, USA
+#
+#       $Id: mne_do_forward_solution 3173 2010-05-26 15:51:02Z msh $
+#
+#       Revision 1.5  2008/10/04 21:58:48  msh
+#       Added --all and --help options
+#
+#       Revision 1.4  2007/03/15 01:52:25  msh
+#       Fixed --bem and --src search algorithms
+#
+#       Revision 1.3  2006/10/04 12:50:59  msh
+#       Use the new program launching utilities
+#
+#       Revision 1.2  2006/04/20 12:54:32  msh
+#       Deleted the script mne_template_mne
+#       Obsoluted NEURO_ROOT
+#       Use mne_make_cor_set instead of create_mri_sets_simple in mne_setup_mri
+#
+#
+usage()
+{
+	echo "usage: $0 [options]"
+	echo
+	echo "      --subject   <subject name>"
+	echo "      --src       <source space name>"
+	echo "      --spacing   <source space grid spacing/mm>"
+	echo "      --meas      <MEG/EEG data file name>"
+	echo "      --mindist   <minimum distance of sources from inner skull surface/mm>"
+	echo "      --mindistout <file to contain coordinates of the points omitted because of the mindist limit>"
+	echo "      --all       include all points in the source space to the solution"
+	echo "      --bem       <bem name>"
+	echo "      --mri       <MRI desc name>"
+	echo "      --trans     <head2mri.trans name>"
+	echo "      --fwd       <forward solution name>"
+	echo "      --destdir   <directory for the forward solution>"
+	echo "      --eegonly   to omit MEG"
+	echo "      --megonly   to omit EEG"
+	echo "      --fixed     to calculate a fixed-orientation solution"
+	echo "      --grad      compute the gradient of the field with respect to the dipole coordinates as well"
+	echo "      --mricoord  to calculate in MRI coordinates"
+	echo "      --overwrite to overwrite existing solution"
+	echo "      --help      show this text"
+	echo
+	exit 1
+}
+if [ $# -eq 0 ] ; then
+	usage
+	exit 1
+fi
+if [ ! "$SUBJECTS_DIR" ] ; then
+	echo "The environment variable SUBJECTS_DIR should be set"
+	exit 1
+fi
+if [ ! "$MNE_ROOT" ] ; then
+    echo "MNE_ROOT environment variable is not set"
+    exit 1
+fi
+#
+#
+#
+force=false
+domeg=--meg
+doeeg=--eeg
+spacing=7
+mindist=0.0
+fwd=
+fixed=
+mricoord=
+grad=
+do_all=false
+destdir=
+#
+#	Parse the options
+#
+while [ $# -gt 0 ]
+do
+	case "$1" in  
+	--subject) 
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--subject: argument required."
+			exit 1
+		else
+			export SUBJECT=$1
+		fi
+		;;
+	--bem) 
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--bem: argument required."
+			exit 1
+		else
+			bem=$1
+		fi
+		;;
+	--meas)
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--meas: argument required."
+			exit 1
+		else
+			meg=$1
+		fi
+		;;
+	--fwd)
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--fwd: argument required."
+			exit 1
+		else
+			fwd=$1
+		fi
+		;;
+	--destdir)
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--destdir: argument required."
+			exit 1
+		else
+			destdir=$1
+		fi
+		;;
+	--mri)
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--mri: argument required."
+			exit 1
+		else
+			mri=$1
+			trans=
+		fi
+		;;
+	--trans)
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--trans: argument required."
+			exit 1
+		else
+		        trans=$1
+			mri=
+		fi
+		;;
+	--src)
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--src: argument required."
+			exit 1
+		else
+			src_space=$1
+			spacing=""
+		fi
+		;;
+	--fixed)
+		fixed=--fixed
+		;;
+	--mricoord)
+		mricoord=--mricoord
+		;;
+	--grad)
+		grad=--grad
+		;;
+	--spacing) 
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--spacing: argument required."
+			exit 1
+		else
+			spacing=$1
+		fi
+		;;
+	--mindist) 
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--mindist: argument required."
+			exit 1
+		else
+			mindist=$1
+		fi
+		;;
+	--mindistout) 
+		shift
+		if [ $# -eq 0 ]
+		then
+			echo "--mindistout: argument required."
+			exit 1
+		else
+			mindistout=$1
+		fi
+		;;
+	--overwrite)
+		force=true
+		;;
+	--all)
+		do_all=true
+		;;
+	--megonly)
+		doeeg=
+		;;
+	--eegonly)
+		domeg=
+		;;
+	--help)
+	        usage
+		exit 0
+		;;
+	esac
+
+	shift
+done
+#
+#	Check everything is alright
+#
+if [ ! "$SUBJECT" ] ; then
+	echo "No subject selected"
+	exit 1
+fi
+#
+subject_dir=$SUBJECTS_DIR/$SUBJECT
+bem_dir=$subject_dir/bem
+mri_dir=$subject_dir/mri/T1-neuromag/sets
+#
+if [ ! -d $subject_dir ] ; then 
+	echo "Could not find the MRI data directory $subject_dir"
+	exit 1
+fi
+if [ ! -d $bem_dir ] ; then 
+	echo "Could not find the BEM directory $bem_dir"
+	exit 1
+fi
+if [ ! "$bem" ] ; then
+    bem=$(ls -t -1 $bem_dir/*-bem.fif 2>/dev/null | head -1 2>/dev/null)
+    if [ ! "$bem" ]
+    then
+	echo "Specify the BEM name with --bem option."
+	exit 1
+    fi
+    bem=$(echo $bem | sed 's/.fif$//g' | sed 's/-sol$//g' | sed 's/-bem$//g')-bem.fif
+else 
+#
+#	Locate the BEM
+#
+    bem=$(echo $bem | sed 's/.fif$//g' | sed 's/-sol$//g' | sed 's/-bem$//g')-bem.fif
+    if [ ! -r $bem ]
+    then
+#
+#       Direct pathname did not work
+#       Try the BEM directory
+#
+	if [ -r $bem_dir/$bem ]
+	then
+	    bem=$bem_dir/$bem
+	else
+	    echo "Could not find the BEM $bem"
+	    exit 1
+	fi
+    fi
+fi
+#
+#	Locate MEG
+#
+if [ ! "$meg" ] ; then
+	echo "MEG data file not specified."
+	exit 1
+fi
+if [ ! -r $meg ] ; then
+	echo "MEG data file $meg not found."
+	exit 1
+fi
+meg_dir=$(dirname $meg)
+#
+#	Locate MRI description file or the head2mri.trans file
+#
+if [ "$mri" ] ; then
+    if [ ! -r $mri ] ; then
+	mri=$(basename $mri)
+	if [ -d $meg_dir ] ; then
+	    mri=$meg_dir/$mri
+	fi
+	if [ ! -r $mri ] ; then 
+	    if [ ! -d $mri_dir ] ; then 
+		echo "Could not find the (Neuromag) MRI description file directory $mri_dir"
+	    exit 1
+	    fi
+	    if [ -r $mri_dir/$mri ] ; then
+		mri=$mri_dir/$mri
+	    else
+		echo "MRI description file $mri not found.."
+		echo "Searched for it in $(pwd), $meg_dir, and $mri_dir"
+		exit 1
+	    fi
+	fi
+    fi
+elif [ "$trans" ] ; then
+    if [ ! -r $trans ] ; then
+	echo "head2mri.trans file $trans not found"
+	exit 1
+    fi
+else 
+    if [ -d "$meg_dir" ] ; then
+	mri=$meg_dir/$(basename $meg .fif)-trans.fif
+	if [ ! -r $mri ] ; then
+	    mri=$(ls -t -1 $meg_dir/*-trans.fif 2>/dev/null | head -1 2>/dev/null)
+	fi
+    fi
+    if [ ! "$mri" ] ; then
+	if [ ! -d $mri_dir ] ; then 
+	    echo "Could not find the (Neuromag) MRI description file directory $mri_dir"
+	    exit 1
+	fi
+	mri=$(ls -t -1 $mri_dir/*COR-*.fif 2>/dev/null | head -1 2>/dev/null)
+	if [ ! "$mri" ] ; then
+	    echo "Specify the MRI file name with --mri option, employ the --trans option, or"
+	    echo "create a *-trans.fif fif file in the same directory where the MEG/EEG data reside"
+	    exit 1
+	fi
+    fi
+fi
+#
+#	Locate the source space
+#
+if [ ! "$src_space" ] ; then 	
+	if [ ! "$spacing" ] ; then
+		echo "Source space grid spacing not defined"
+		exit 1
+	else
+		src_space=$SUBJECT-$spacing-src.fif
+	fi
+fi
+if [ ! -r $src_space ] ; then
+    if [ -r $bem_dir/$src_space ] ; then
+	src_space=$bem_dir/$src_space
+    else
+	echo "Source space file $src_space not found."
+	exit 1
+    fi
+fi
+if [ ! "$fwd" ] ; then 
+	if [ $spacing ] ; then
+		fwd=$(dirname $meg)/$(basename $meg .fif)-$spacing-fwd.fif
+	else
+		fwd=$(dirname $meg)/$(basename $meg .fif)-$(basename $src_space .fif)-fwd.fif
+	fi
+fi
+#
+# Apply --destdir option if appropriate
+#
+if [ "$destdir" ] ; then
+    fwd=`basename $fwd`
+    fwd=${destdir}/$fwd
+fi
+if [ -f $fwd -a "$force" = false ] ; then
+	echo "Forward solution $fwd already computed."
+	echo "Specify --overwrite to replace it with a new one."
+	exit 1
+else
+	rm -f $fwd
+fi
+#
+#	Report
+#
+#echo 
+#echo "Doing the forward calculation with the following settings:"
+#echo
+#echo "SUBJECTS_DIR            = $SUBJECTS_DIR"
+#echo "Subject                 = $SUBJECT"
+#echo "BEM                     = $bem"
+#echo "MEG                     = $meg"
+#echo "MRI desc                = $mri"
+#echo "Source space            = $src_space"
+#echo "Resulting forward model = $fwd"
+#echo
+#
+#	Go ahead and do it
+#
+fwd_command="mne_forward_solution \
+		$domeg $doeeg --accurate  \
+		--src  $src_space \
+		--meas $meg \
+		--fwd  $fwd \
+		$fixed \
+                $mricoord \
+                $grad \
+		--bem  $bem \
+		--mindist $mindist"
+if [ "$mri" ] ; then
+    fwd_command="$fwd_command --mri $mri"
+else
+    fwd_command="$fwd_command --trans $trans"
+fi
+if [ "$do_all" = true ] ; then
+    fwd_command="$fwd_command --all"
+fi
+if [ "$mindistout" ] ; then
+    fwd_command="$fwd_command --mindistout $mindistout"
+fi
+$fwd_command
+if [ $? != 0 ] ; then
+	echo "Forward computation failed (see above)"
+	exit 1
+fi
+#
+echo
+exit 0
+
+
+
