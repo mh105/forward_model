@@ -60,12 +60,32 @@ if interpl
         src_distance(:,ii) = vecnorm(source - source(ii,:), 2, 2);
     end
     
+    fprintf("detect_badsource: Number of NaN values in src_distance: %d \n", sum(isnan(src_distance(:))));
+
     % fix bad sources
     update_values = zeros(size(G,1), length(bad_src_idx));
     xyz_update_values = zeros(size(G,1), length(bad_src_idx)*3);
     for ii = 1:length(bad_src_idx)
-        neighbor_sources = find(src_distance(bad_src_idx(ii), :) < 0.01); % 10mm
-        neighbor_sources(neighbor_sources==bad_src_idx(ii)) = []; % exclude oneself
+
+        threshold = 0.01; % start with 10mm
+        neighbor_sources = [];
+        
+        % adaptively increase threshold until at least one neighbor is found
+        while isempty(neighbor_sources)
+            neighbor_sources = find(src_distance(bad_src_idx(ii), :) < threshold);
+            
+            % exclude neighbors that are also bad sources
+            neighbor_sources(ismember(neighbor_sources, bad_src_idx)) = [];
+            
+            % exclude oneself
+            neighbor_sources(neighbor_sources == bad_src_idx(ii)) = [];
+            
+            % if empty or all NaN, increase threshold
+            if isempty(neighbor_sources) || all(isnan(src_distance(bad_src_idx(ii), neighbor_sources)))
+                threshold = threshold + 0.001; % add 1mm
+            end
+        end
+        
         update_values(:,ii) = mean(G(:, neighbor_sources), 2);
         if ~isempty(xyzG) % need to fix free-orientation LFM as well
             [~, x,y,z] = fix2freeindexing(neighbor_sources);
@@ -75,6 +95,7 @@ if interpl
             xyz_update_values(:, first_column_idx+2) = mean(xyzG(:, z), 2);
         end
     end
+ 
     G(:, bad_src_idx) = update_values;
     if ~isempty(xyzG)
         xyzG(:, bad_src_free_column) = xyz_update_values;
@@ -90,8 +111,25 @@ if interpl
         total_size = 0;
         for ii = 1:length(bad_entry_idx)
             [row,col] = ind2sub(sz,bad_entry_idx(ii));
-            neighbor_sources = find(src_distance(col, :) < 0.01); % 10mm
-            neighbor_sources(neighbor_sources==col) = []; % exclude oneself
+            threshold = 0.01; % start with 10mm
+            neighbor_sources = [];
+            
+            % adaptively increase threshold until at least one neighbor is found
+            while isempty(neighbor_sources)
+                neighbor_sources = find(src_distance(col, :) < threshold);
+                
+                % exclude neighbors that are also bad sources
+                neighbor_sources(ismember(neighbor_sources, bad_entry_idx)) = [];
+                
+                % exclude oneself
+                neighbor_sources(neighbor_sources == col) = [];
+                
+                % if empty or all NaN, increase threshold
+                if isempty(neighbor_sources) || all(isnan(src_distance(col, neighbor_sources)))
+                    threshold = threshold + 0.001; % add 1mm
+                end
+            end
+            
             update_values(ii) = mean(G(row, neighbor_sources));
             if ~isempty(xyzG) % need to fix free-orientation LFM as well
                 [~, x,y,z] = fix2freeindexing(neighbor_sources);
@@ -104,6 +142,7 @@ if interpl
                 bad_entry_xyz_idx(first_idx:first_idx+2) = xyz_update_idx;
             end
         end
+
         G(bad_entry_idx) = update_values;
         if ~isempty(xyzG)
             assert(total_size == length(bad_entry_idx)*3, 'total size of entries fixed in xyzG is incorrect!')
