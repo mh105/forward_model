@@ -70,8 +70,8 @@ mne.bem.make_watershed_bem(subject=subject, subjects_dir=subjects_dir,
 
 # create FLASH BEM surfaces
 flash_path = op.join(subjects_dir, subject, 'mri', 'flash', 'flash5_reg.mgz')
-mne.bem.make_flash_bem(subject=subject, subjects_dir=subjects_dir, flash5_img=flash_path, register=False,
-                       overwrite=True, verbose=True, show=False)
+mne.bem.make_flash_bem(subject=subject, subjects_dir=subjects_dir, flash5_img=flash_path, register=True,
+                       overwrite=True, verbose=True, show=False) #register=True
 
 # create a new symbolic link to point the outer_skin.surf file to the watershed surface
 # NOTE: there is a bug with MNE 0.20.0 on how it handles the watershed algorithm such that
