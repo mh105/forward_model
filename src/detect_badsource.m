@@ -60,8 +60,6 @@ if interpl
         src_distance(:,ii) = vecnorm(source - source(ii,:), 2, 2);
     end
     
-    fprintf("detect_badsource: Number of NaN values in src_distance: %d \n", sum(isnan(src_distance(:))));
-
     % fix bad sources
     update_values = zeros(size(G,1), length(bad_src_idx));
     xyz_update_values = zeros(size(G,1), length(bad_src_idx)*3);
@@ -77,11 +75,8 @@ if interpl
             % exclude neighbors that are also bad sources
             neighbor_sources(ismember(neighbor_sources, bad_src_idx)) = [];
             
-            % exclude oneself
-            neighbor_sources(neighbor_sources == bad_src_idx(ii)) = [];
-            
             % if empty or all NaN, increase threshold
-            if isempty(neighbor_sources) || all(isnan(src_distance(bad_src_idx(ii), neighbor_sources)))
+            if isempty(neighbor_sources) 
                 threshold = threshold + 0.001; % add 1mm
             end
         end
@@ -109,6 +104,10 @@ if interpl
         bad_entry_xyz_idx = zeros(length(bad_entry_idx)*3, 1);
         xyz_update_values = zeros(length(bad_entry_idx)*3, 1);
         total_size = 0;
+
+        % find column indices of all bad entries
+        [~, col_all] = ind2sub(sz, bad_entry_idx);
+
         for ii = 1:length(bad_entry_idx)
             [row,col] = ind2sub(sz,bad_entry_idx(ii));
             threshold = 0.01; % start with 10mm
@@ -119,13 +118,10 @@ if interpl
                 neighbor_sources = find(src_distance(col, :) < threshold);
                 
                 % exclude neighbors that are also bad sources
-                neighbor_sources(ismember(neighbor_sources, bad_entry_idx)) = [];
-                
-                % exclude oneself
-                neighbor_sources(neighbor_sources == col) = [];
+                neighbor_sources(ismember(neighbor_sources, col_all)) = [];
                 
                 % if empty or all NaN, increase threshold
-                if isempty(neighbor_sources) || all(isnan(src_distance(col, neighbor_sources)))
+                if isempty(neighbor_sources)
                     threshold = threshold + 0.001; % add 1mm
                 end
             end
