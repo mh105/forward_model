@@ -16,9 +16,6 @@ end
 update_values = zeros(size(G,1), length(srcidx));
 xyz_update_values = zeros(size(G,1), length(srcidx)*3);
 
-% find indices of all bad sources to exclude
-[~, col_all] = ind2sub(size(G), srcidx);
-
 for ii = 1:length(srcidx)
     threshold = 0.01; % start with 10mm
     neighbor_sources = [];
@@ -28,9 +25,9 @@ for ii = 1:length(srcidx)
         neighbor_sources = find(src_distance(srcidx(ii), :) < threshold);
 
         % exclude all bad sources
-        neighbor_sources(ismember(neighbor_sources, col_all)) = [];
+        neighbor_sources(ismember(neighbor_sources, srcidx)) = [];
         
-        % if empty or all NaN, increase threshold
+        % if empty, increase threshold
         if isempty(neighbor_sources) 
             threshold = threshold + 0.001; % add 1mm
         end

@@ -75,7 +75,7 @@ if interpl
             % exclude neighbors that are also bad sources
             neighbor_sources(ismember(neighbor_sources, bad_src_idx)) = [];
             
-            % if empty or all NaN, increase threshold
+            % if empty, increase threshold
             if isempty(neighbor_sources) 
                 threshold = threshold + 0.001; % add 1mm
             end
