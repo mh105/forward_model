@@ -328,9 +328,11 @@ fi
 
 cp mri2mesh_fs_lh_wm_fixed.surf m2m_recon/surf/lh.white
 cp $M2MDIR/fs*/surf/lh.sphere m2m_recon/surf/lh.sphere
+cp $M2MDIR/fs*/surf/lh.inflated m2m_recon/surf/lh.inflated
 cp $M2MDIR/fs*/surf/lh.pial m2m_recon/surf/lh.pial
 cp mri2mesh_fs_rh_wm_fixed.surf m2m_recon/surf/rh.white
 cp $M2MDIR/fs*/surf/rh.sphere m2m_recon/surf/rh.sphere
+cp $M2MDIR/fs*/surf/rh.inflated m2m_recon/surf/rh.inflated
 cp $M2MDIR/fs*/surf/rh.pial m2m_recon/surf/rh.pial
 
 python $CODEDIR/set_up_source.py 345
