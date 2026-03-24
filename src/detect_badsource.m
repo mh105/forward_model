@@ -32,7 +32,7 @@ end
 % detect if an entry of G is abnormal
 if detectentry
     % exclude bad entries in G if they lie outside distribution
-    bad_entry = isoutlier(G(:),  'grubbs');
+    bad_entry = isoutlier(G(:), 'grubbs');
     bad_entry_idx = find(bad_entry==1);
     G(bad_entry_idx) = 0;
     if ~isempty(xyzG) % if we need to fix the free-orientation LFM as well
@@ -59,7 +59,7 @@ if interpl
     for ii = 1:size(src_distance,1)
         src_distance(:,ii) = vecnorm(source - source(ii,:), 2, 2);
     end
-    
+
     % fix bad sources
     update_values = zeros(size(G,1), length(bad_src_idx));
     xyz_update_values = zeros(size(G,1), length(bad_src_idx)*3);
@@ -67,20 +67,20 @@ if interpl
 
         threshold = 0.01; % start with 10mm
         neighbor_sources = [];
-        
+
         % adaptively increase threshold until at least one neighbor is found
         while isempty(neighbor_sources)
             neighbor_sources = find(src_distance(bad_src_idx(ii), :) < threshold);
-            
+
             % exclude neighbors that are also bad sources
             neighbor_sources(ismember(neighbor_sources, bad_src_idx)) = [];
-            
+
             % if empty, increase threshold
-            if isempty(neighbor_sources) 
+            if isempty(neighbor_sources)
                 threshold = threshold + 0.001; % add 1mm
             end
         end
-        
+
         update_values(:,ii) = mean(G(:, neighbor_sources), 2);
         if ~isempty(xyzG) % need to fix free-orientation LFM as well
             [~, x,y,z] = fix2freeindexing(neighbor_sources);
@@ -90,12 +90,12 @@ if interpl
             xyz_update_values(:, first_column_idx+2) = mean(xyzG(:, z), 2);
         end
     end
- 
+
     G(:, bad_src_idx) = update_values;
     if ~isempty(xyzG)
         xyzG(:, bad_src_free_column) = xyz_update_values;
     end
-    
+
     if detectentry
         % fix bad entries
         update_values = zeros(size(bad_entry_idx));
@@ -112,20 +112,20 @@ if interpl
             [row,col] = ind2sub(sz,bad_entry_idx(ii));
             threshold = 0.01; % start with 10mm
             neighbor_sources = [];
-            
+
             % adaptively increase threshold until at least one neighbor is found
             while isempty(neighbor_sources)
                 neighbor_sources = find(src_distance(col, :) < threshold);
-                
+
                 % exclude neighbors that are also bad sources
                 neighbor_sources(ismember(neighbor_sources, col_all)) = [];
-                
+
                 % if empty or all NaN, increase threshold
                 if isempty(neighbor_sources)
                     threshold = threshold + 0.001; % add 1mm
                 end
             end
-            
+
             update_values(ii) = mean(G(row, neighbor_sources));
             if ~isempty(xyzG) % need to fix free-orientation LFM as well
                 [~, x,y,z] = fix2freeindexing(neighbor_sources);

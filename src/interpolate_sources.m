@@ -1,6 +1,6 @@
 function [ G, xyzG ] = interpolate_sources(G, source, srcidx, xyzG)
 %Function used for manual identification of outlier source points and
-%generate interpolation of these source points using near-by points 
+%generate interpolation of these source points using near-by points
 
 if nargin < 4
     xyzG = [];
@@ -19,16 +19,16 @@ xyz_update_values = zeros(size(G,1), length(srcidx)*3);
 for ii = 1:length(srcidx)
     threshold = 0.01; % start with 10mm
     neighbor_sources = [];
-    
+
     % adaptively increase threshold until at least one neighbor is found
     while isempty(neighbor_sources)
         neighbor_sources = find(src_distance(srcidx(ii), :) < threshold);
 
         % exclude all bad sources
         neighbor_sources(ismember(neighbor_sources, srcidx)) = [];
-        
+
         % if empty, increase threshold
-        if isempty(neighbor_sources) 
+        if isempty(neighbor_sources)
             threshold = threshold + 0.001; % add 1mm
         end
     end
@@ -49,4 +49,3 @@ if ~isempty(xyzG)
 end
 
 end
-

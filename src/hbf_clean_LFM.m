@@ -39,33 +39,37 @@ end
 for ii = 1:length(ico_list)
     % iterate through different icosahedron resolutions
     ico = ico_list{ii};
-    
+
     %% Examine LFM in closer details and post processing
     % Well. Let's try to examine the lead field matrix in closer details and
     % visualize the loading plots. This should give us confidence that the
     % solver is actually working.
-    
+
     load(fullfile(datapath, ['4shell_hbfBEM_rawLFM-', ico, '.mat']), ...
         'LFMphi_dir', 'LFMphi_xyz', 'sourcepos', 'sourcedir', 'elecs', 'bmeshes')
-    
+
+    % Make sure there is no NaN before we begin
+    assert(~any(isnan(LFMphi_dir(:))), 'NaN entry identified in LFMphi_dir.')
+    assert(~any(isnan(LFMphi_xyz(:))), 'NaN entry identified in LFMphi_xyz.')
+
     % Let's examine the leadfield matrix
     G = LFMphi_dir;
     xyzG = LFMphi_xyz;
-    
+
     % check the histogram of G matrix entries
     figure;
     subplot(1,2,1)
     histogram(G(:), 100)
     title('Before detect_badsource()', 'FontSize', 16, 'interpreter', 'none')
-    
+
     [ G, badsrc, badety, xyzG ] = detect_badsource(G, sourcepos, true, xyzG);
     disp(['Number of bad sources found: ' num2str(sum(badsrc))])
     disp(['Number of bad entries found: ' num2str(sum(badety))])
-    
+
     subplot(1,2,2)
     histogram(G(:), 100)
     title('After detect_badsource()', 'FontSize', 16, 'interpreter', 'none')
-    
+
     % Forward model variables
     forward_model.G = G;
     forward_model.xyzG = xyzG;
@@ -74,17 +78,17 @@ for ii = 1:length(ico_list)
     forward_model.normal = sourcedir;
     forward_model.skin_surf_face = bmeshes{end}.e;
     forward_model.skin_surf_vertice = bmeshes{end}.p;
-    
+
     if verbose
         % Loading plot of an example channel (reference channel 85)
         plot_loading(85, forward_model, false, true, false);
         title('Does this look reasonable?', 'FontSize', 20)
-        
+
         % visualize the bad sources
         badsrc_idx = find(badsrc==1);
         scatter3(sourcepos(badsrc_idx,1), sourcepos(badsrc_idx,2), sourcepos(badsrc_idx,3), 300, 'r', 'filled')
     end
-    
+
     %% Further sanity checking of source gain
     % Now. What it looks like is that there are some artifact source points
     % near the base of the scalp on the medial surface of the temporal lobe
@@ -93,15 +97,15 @@ for ii = 1:length(ico_list)
     % be judged on a case-by-base basis. What I will propose here instead is a
     % manual checking to identify erroneous source poitns and interpolate them
     % using mean of near-by-source points.
-    
+
     % Due to the nature of these source points, they are most easily detectable
     % when you do the loading plot of extreme electrodes and at top central
     % electrodes. Hence we will iteratively search through these and use
     % histograms to guide our marking of source points to interpolate.
-    
+
     % we can clearly see these points using electrode 47 or 1 (mastoid
     % electrodes)
-    
+
     % Right mastoid electrode
     channel = 47;
     high_src_p = hbf_check_LFM_outlier(channel, forward_model, 0.999, G, verbose);
@@ -114,7 +118,7 @@ for ii = 1:length(ico_list)
         plot_loading(channel, forward_model, false, true, false);
         title('Right Mastoid Post-fixing', 'FontSize', 20)
     end
-    
+
     % Repeat the same thing for the left mastoid electrode
     channel = 1;
     high_src_p = hbf_check_LFM_outlier(channel, forward_model, 0.999, Gprime, verbose);
@@ -127,7 +131,7 @@ for ii = 1:length(ico_list)
         plot_loading(channel, forward_model, false, true, false);
         title('Left Mastoid Post-fixing', 'FontSize', 20)
     end
-    
+
     % Iterate through all other channels and keep track of which are outlier
     % sources
     outlier_source = [];
@@ -139,7 +143,7 @@ for ii = 1:length(ico_list)
     end
     outlier_source = unique(outlier_source); % find the unique ones
     disp(['Total number of bad sources detected pooling across channels: ', num2str(length(outlier_source))])
-    
+
     % visualize all the strange sources
     if verbose
         plot_loading(85, forward_model, false, true, false);
@@ -154,19 +158,19 @@ for ii = 1:length(ico_list)
         plot_loading(85, forward_model, false, true, false);
         title('Reference channel Post-fixing', 'FontSize', 20)
     end
-    
+
     %%
     % ok - Update G;
     G = Gprime;
     xyzG = xyzGprime;
     forward_model.G = G;
     forward_model.xyzG = xyzG;
-    
+
     % in theory we could have done the same with patch decomposition, but i
     % think patch decomposition sacrifices the number of sources so it's better
     % to manually identify the very few odd source points and preserve the
     % source resolution. If we need to patch decompose later, that's fine.
-    
+
     % Let's save all the data at this point.
     save(fullfile(datapath, ['4shell_hbfBEM_finalLFM-', ico, '.mat']), 'G', 'xyzG', 'forward_model')
 
@@ -176,7 +180,7 @@ end
 
 warning('on', 'all')
 
-disp('Total time taken:') 
+disp('Total time taken:')
 toc
 
 pause(10)
@@ -185,15 +189,14 @@ close all
 end
 
 
-
 function [ high_src_p ] = hbf_check_LFM_outlier(channel, forward_model, pcut, Gprime, ploton)
-%Used to detect outliers in the LFM on a specified channel 
+%Used to detect outliers in the LFM on a specified channel
 
 if nargin < 5
     ploton = false;
 end
 
-% check a channel 
+% check a channel
 if ploton
     plot_loading(channel, forward_model, false, true, false);
     title(['Channel ', num2str(channel), ' Pre-fixing - bad sourecs marked in Red'], 'FontSize', 20)
